@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, memo } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Work from './components/Work';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import { NAV_LINKS } from './config';
-import './styles/global.css';
+import Navbar from '/components/Navbar';
+import Hero from '/components/Hero';
+import About from '/components/About';
+import Skills from '/components/Skills';
+import Work from '/components/Work';
+import Contact from '/components/Contact';
+import Footer from '/components/Footer';
+import { NAV_LINKS } from '/config';
+import '/styles/global.css';
 
 const ScrollToTop = memo(({ show, onClick }) => {
   return (
