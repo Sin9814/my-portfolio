@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useCallback, memo } from 'react';
 import Navbar from '/components/Navbar';
 import Hero from '/components/Hero';
