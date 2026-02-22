@@ -4,7 +4,7 @@
 export const CONFIG = {
   name: "Sakshi Kataria",
   title: "", // Removed role tag
-  email: "sakshi@example.com",
+  email: "sakshikataria9814@gmail.com",
   resumeLink: "https://drive.google.com/file/d/1s4TZBF8jM6UAo2I1IiDfq6uLATdGdy-4/view",
   location: "India",
   experience: "2+ Years",
