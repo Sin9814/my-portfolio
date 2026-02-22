@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { PROJECTS } from '../config';
+import { PROJECTS } from '../config.js';
 
 const Contact = memo(() => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });

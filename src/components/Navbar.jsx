@@ -1,6 +1,6 @@
 import { useEffect, memo } from 'react';
-import { Icon } from './common/Icon';
-import { CONFIG, NAV_LINKS } from '../config';
+import { Icon } from './common/Icon.jsx';
+import { CONFIG, NAV_LINKS } from '../config.js';
 
 const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, activeSection }) => {
   useEffect(() => {

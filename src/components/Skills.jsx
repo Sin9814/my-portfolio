@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { SKILLS } from '../config';
+import { SKILLS } from '../config.js';
 
 const Skills = memo(() => {
   return (

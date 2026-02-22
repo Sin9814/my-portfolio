@@ -1,5 +1,5 @@
 import { memo, useRef, useCallback } from 'react';
-import { PROJECTS } from '../config';
+import { PROJECTS } from '../config.js';
 
 const Work = memo(() => {
   const scrollRef = useRef(null);

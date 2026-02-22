@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Icon } from './common/Icon';
+import { Icon } from './common/Icon.jsx';
 
 const Hero = memo(({ scrollTo }) => {
   return (

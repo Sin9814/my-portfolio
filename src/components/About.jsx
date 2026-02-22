@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { Icon } from './common/Icon';
-import { CONFIG } from '../config';
+import { Icon } from './common/Icon.jsx';
+import { CONFIG } from '../config.js';
 
 const About = memo(() => {
   return (

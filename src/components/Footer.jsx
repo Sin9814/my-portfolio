@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { CONFIG } from '../config';
+import { CONFIG } from '../config.js';
 
 const Footer = memo(() => {
   const year = new Date().getFullYear();
