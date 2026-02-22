@@ -12,12 +12,8 @@ const Contact = memo(() => {
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    
-    // Create email body from form data
     const subject = `Portfolio Contact from ${formData.name}`;
     const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0A%0D%0AMessage:%0D%0A${formData.message}`;
-    
-    // Open email client
     window.location.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
   }, [formData]);
 
@@ -28,19 +24,34 @@ const Contact = memo(() => {
           <h2>Get in Touch</h2>
         </header>
 
-        <div style={{ maxWidth: '600px' }}>
-          <p style={{ 
-            fontSize: '1.125rem', 
-            lineHeight: '1.8', 
-            color: 'var(--text-secondary)',
-            marginBottom: 'var(--space-xl)'
-          }}>
-            Let us explore opportunities together. I'm available for full-time roles 
-            and open to discussing project ideas that can be brought to fruition. 
-            Suggestions and friendly greetings are also welcome.
-          </p>
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 'var(--space-3xl)',
+          alignItems: 'start'
+        }}>
+          {/* Left side - Text */}
+          <div>
+            <p style={{ 
+              fontSize: '1.25rem', 
+              lineHeight: '1.8', 
+              color: 'var(--text-secondary)',
+              marginBottom: 'var(--space-lg)'
+            }}>
+              Let us explore opportunities together. I'm available for full-time roles 
+              and open to discussing project ideas that can be brought to fruition.
+            </p>
+            <p style={{ 
+              fontSize: '1.125rem', 
+              lineHeight: '1.8', 
+              color: 'var(--text-muted)'
+            }}>
+              Suggestions and friendly greetings are also welcome. Let's connect.
+            </p>
+          </div>
 
-          <form className="contact-form" onSubmit={handleSubmit}>
+          {/* Right side - Form */}
+          <form className="contact-form" onSubmit={handleSubmit} style={{ maxWidth: 'none' }}>
             <div className="form-row">
               <input
                 type="text"
@@ -61,7 +72,7 @@ const Contact = memo(() => {
             </div>
             <textarea
               name="message"
-              rows="5"
+              rows="6"
               placeholder="Your message..."
               value={formData.message}
               onChange={handleChange}
