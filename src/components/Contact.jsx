@@ -24,34 +24,20 @@ const Contact = memo(() => {
           <h2>Get in Touch</h2>
         </header>
 
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 'var(--space-3xl)',
-          alignItems: 'start'
-        }}>
+        <div className="contact-grid">
           {/* Left side - Text */}
-          <div>
-            <p style={{ 
-              fontSize: '1.25rem', 
-              lineHeight: '1.8', 
-              color: 'var(--text-secondary)',
-              marginBottom: 'var(--space-lg)'
-            }}>
+          <div className="contact-text">
+            <p className="contact-description">
               Let us explore opportunities together. I'm available for full-time roles 
               and open to discussing project ideas that can be brought to fruition.
             </p>
-            <p style={{ 
-              fontSize: '1.125rem', 
-              lineHeight: '1.8', 
-              color: 'var(--text-muted)'
-            }}>
+            <p className="contact-subtext">
               Suggestions and friendly greetings are also welcome. Let's connect.
             </p>
           </div>
 
           {/* Right side - Form */}
-          <form className="contact-form" onSubmit={handleSubmit} style={{ maxWidth: 'none' }}>
+          <form className="contact-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <input
                 type="text"
@@ -84,6 +70,52 @@ const Contact = memo(() => {
           </form>
         </div>
       </div>
+
+      <style>{`
+        .contact-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-3xl);
+          align-items: start;
+        }
+        
+        .contact-text {
+          max-width: 500px;
+        }
+        
+        .contact-description {
+          font-size: 1.25rem;
+          line-height: 1.8;
+          color: var(--text-secondary);
+          margin-bottom: var(--space-lg);
+        }
+        
+        .contact-subtext {
+          font-size: 1.125rem;
+          line-height: 1.8;
+          color: var(--text-muted);
+        }
+        
+        .contact-form {
+          max-width: none;
+        }
+        
+        /* Mobile: Stack vertically */
+        @media (max-width: 768px) {
+          .contact-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+          }
+          
+          .contact-description {
+            font-size: 1.1rem;
+          }
+          
+          .contact-subtext {
+            font-size: 1rem;
+          }
+        }
+      `}</style>
     </section>
   );
 });
