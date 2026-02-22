@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useCallback, memo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
@@ -112,6 +113,7 @@ const scrollTo = useCallback((id) => {
         show={showScrollTop} 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       />
+      <Analytics />
     </div>
   );
 }
