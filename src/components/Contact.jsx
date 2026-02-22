@@ -1,54 +1,76 @@
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { Icon } from './common/Icon';
 import { CONFIG } from '../config';
 
 const Contact = memo(() => {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = useCallback((e) => {
+    e.preventDefault();
+    
+    // Create email body from form data
+    const subject = `Portfolio Contact from ${formData.name}`;
+    const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0A%0D%0AMessage:%0D%0A${formData.message}`;
+    
+    // Open email client
+    window.location.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
+  }, [formData]);
+
   return (
     <section id="contact" className="section">
       <div className="container">
-        <div className="contact-wrapper" style={{ maxWidth: '600px' }}>
-          <header className="section-header">
-            <h2>Get in Touch</h2>
-          </header>
+        <header className="section-header">
+          <h2>Get in Touch</h2>
+        </header>
 
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: 'var(--space-lg)',
-            padding: 'var(--space-xl) 0'
+        <div style={{ maxWidth: '600px' }}>
+          <p style={{ 
+            fontSize: '1.125rem', 
+            lineHeight: '1.8', 
+            color: 'var(--text-secondary)',
+            marginBottom: 'var(--space-xl)'
           }}>
-            <p style={{ 
-              fontSize: '1.125rem', 
-              lineHeight: '1.8', 
-              color: 'var(--text-secondary)' 
-            }}>
-              Let us explore opportunities together. I'm available for full-time roles 
-              and open to discussing project ideas that can be brought to fruition. 
-              Suggestions and friendly greetings are also welcome.
-            </p>
+            Let us explore opportunities together. I'm available for full-time roles 
+            and open to discussing project ideas that can be brought to fruition. 
+            Suggestions and friendly greetings are also welcome.
+          </p>
 
-            <a 
-              href={`mailto:${CONFIG.email}`}
-              className="btn btn-primary"
-              style={{ 
-                alignSelf: 'flex-start',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 'var(--space-sm)'
-              }}
-            >
-              <Icon name="Mail" size={18} />
-              Say Hello
-            </a>
-
-            <p style={{ 
-              fontSize: '0.875rem', 
-              color: 'var(--text-muted)',
-              marginTop: 'var(--space-md)'
-            }}>
-              Or find me on <a href={CONFIG.social.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>LinkedIn</a>
-            </p>
-          </div>
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <div className="form-row">
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <textarea
+              name="message"
+              rows="5"
+              placeholder="Your message..."
+              value={formData.message}
+              onChange={handleChange}
+              required
+            />
+            <button type="submit" className="btn-submit">
+              <Icon name="Send" size={16} /> Send Message
+            </button>
+          </form>
         </div>
       </div>
     </section>
