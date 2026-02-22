@@ -8,7 +8,7 @@ import Work from './components/Work.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import { NAV_LINKS } from './config.js';
-import '/styles/global.css';
+import './styles/global.css';
 
 const ScrollToTop = memo(({ show, onClick }) => {
   return (
