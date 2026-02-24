@@ -5,7 +5,7 @@ export const CONFIG = {
   name: "Sakshi Kataria",
   title: "", // Removed role tag
   email: "sakshikataria9814@gmail.com",
-  resumeLink: "https://drive.google.com/file/d/1s4TZBF8jM6UAo2I1IiDfq6uLATdGdy-4/view",
+  resumeLink: "https://drive.google.com/file/d/1voYYu3-i2AxD4egr7p-IbUJDNPhsPvrR/view?usp=sharing",
   location: "India",
   experience: "2+ Years",
   company: "Tata Consultancy Services",
