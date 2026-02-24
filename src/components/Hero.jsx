@@ -22,7 +22,7 @@ const Hero = memo(({ scrollTo }) => {
           </button>
           
           <a 
-            href="https://drive.google.com/file/d/1s4TZBF8jM6UAo2I1IiDfq6uLATdGdy-4/view"
+            href=""
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-secondary"
