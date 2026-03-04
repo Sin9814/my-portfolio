@@ -1,28 +1,27 @@
-// src/components/Contact.jsx
-import { memo, useState, useCallback, useRef, useEffect } from 'react';
+// src/components/Contact.jsx - Remove email link
+import { memo, useState, useCallback } from 'react';
 import { Icon } from './common/Icon';
 import { CONFIG } from '../config';
 
 const InputField = ({ type, name, placeholder, value, onChange, required, isTextarea }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasValue, setHasValue] = useState(false);
-  const inputRef = useRef(null);
   
-  useEffect(() => {
-    setHasValue(value.length > 0);
-  }, [value]);
+  const handleChange = (e) => {
+    onChange(e);
+    setHasValue(e.target.value.length > 0);
+  };
   
   const Component = isTextarea ? 'textarea' : 'input';
   
   return (
     <div className={`input-wrapper ${isFocused ? 'focused' : ''} ${hasValue ? 'has-value' : ''}`}>
       <Component
-        ref={inputRef}
         type={type}
         name={name}
         placeholder=" "
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         required={required}
@@ -79,13 +78,7 @@ const Contact = memo(() => {
               Suggestions and friendly greetings are also welcome. Let's connect.
             </p>
             
-            <div className="contact-links">
-              <a href={`mailto:${CONFIG.email}`} className="contact-link">
-                <span className="link-icon"><Icon name="Mail" size={18} /></span>
-                <span className="link-text">{CONFIG.email}</span>
-                <span className="link-arrow">→</span>
-              </a>
-            </div>
+            {/* Email link removed - form is sufficient */}
           </div>
 
           <form className="contact-form" onSubmit={handleSubmit}>

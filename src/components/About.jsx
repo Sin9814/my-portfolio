@@ -1,62 +1,7 @@
-// src/components/About.jsx
-import { memo, useEffect, useRef, useState } from 'react';
+// src/components/About.jsx - Remove stats section
+import { memo, useState } from 'react';
 import { Icon } from './common/Icon.jsx';
 import { CONFIG } from '../config.js';
-
-const AnimatedCounter = ({ value, suffix = '', label }) => {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef(null);
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isVisible) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [isVisible]);
-  
-  useEffect(() => {
-    if (!isVisible) return;
-    
-    const numValue = parseInt(value.replace(/\D/g, '')) || 0;
-    const duration = 2000;
-    const steps = 60;
-    const increment = numValue / steps;
-    let current = 0;
-    let step = 0;
-    
-    const timer = setInterval(() => {
-      step++;
-      current = Math.min(Math.floor(increment * step), numValue);
-      setCount(current);
-      
-      if (step >= steps) {
-        clearInterval(timer);
-        setCount(numValue);
-      }
-    }, duration / steps);
-    
-    return () => clearInterval(timer);
-  }, [isVisible, value]);
-  
-  const displayValue = value.includes('M') ? `${count}M+` : 
-                     value.includes('+') ? `${count}+` : 
-                     value.includes('%') ? `${count}%` : count;
-  
-  return (
-    <div ref={ref} className="stat-item">
-      <span className="stat-value">{isVisible ? displayValue : '0'}</span>
-      <span className="stat-label">{label}</span>
-    </div>
-  );
-};
 
 const About = memo(() => {
   const [hoveredTag, setHoveredTag] = useState(null);
@@ -107,12 +52,7 @@ const About = memo(() => {
             </p>
           </div>
           
-          <div className="about-stats">
-            <AnimatedCounter value="10+" label="Production Services" />
-            <AnimatedCounter value="1M+" label="Weekly DB Queries" />
-            <AnimatedCounter value="DAW" label="Module Lead" />
-            <AnimatedCounter value="0" label="Downtime (MIS)" />
-          </div>
+          {/* Stats section removed as requested */}
         </div>
       </div>
     </section>

@@ -2,61 +2,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Icon } from './common/Icon.jsx';
 
-const TextScramble = ({ text, className }) => {
-  const [displayText, setDisplayText] = useState(text);
-  const [isHovering, setIsHovering] = useState(false);
-  const chars = '!<>-_\\/[]{}—=+*^?#________';
-  const frameRef = useRef();
-  const queueRef = useRef([]);
-  
-  useEffect(() => {
-    let frame = 0;
-    const animate = () => {
-      let output = '';
-      let complete = 0;
-      
-      for (let i = 0; i < text.length; i++) {
-        if (queueRef.current[i] && queueRef.current[i] > 0) {
-          queueRef.current[i]--;
-          output += chars[Math.floor(Math.random() * chars.length)];
-        } else {
-          output += text[i];
-          complete++;
-        }
-      }
-      
-      setDisplayText(output);
-      
-      if (complete < text.length) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setDisplayText(text);
-      }
-    };
-    
-    if (isHovering) {
-      queueRef.current = text.split('').map(() => Math.floor(Math.random() * 10) + 5);
-      animate();
-    }
-    
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [isHovering, text]);
-  
-  return (
-    <span 
-      className={className}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => {
-        setIsHovering(false);
-        setDisplayText(text);
-      }}
-      style={{ cursor: 'default' }}
-    >
-      {displayText}
-    </span>
-  );
-};
-
 const MagneticButton = ({ children, className, onClick, ...props }) => {
   const btnRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -66,7 +11,7 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
     const rect = btnRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    setPosition({ x: x * 0.3, y: y * 0.3 });
+    setPosition({ x: x * 0.2, y: y * 0.2 });
   };
   
   const handleMouseLeave = () => {
@@ -91,8 +36,74 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
   );
 };
 
+// Elegant typewriter effect - professional, not glitchy
+const TypewriterText = ({ text, className, delay = 0 }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [showCursor, setShowCursor] = useState(true);
+  const [isComplete, setIsComplete] = useState(false);
+  
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index <= text.length) {
+          setDisplayText(text.slice(0, index));
+          index++;
+        } else {
+          clearInterval(interval);
+          setIsComplete(true);
+          // Blink cursor a few times then hide
+          setTimeout(() => setShowCursor(false), 2000);
+        }
+      }, 60); // Slower, more elegant
+      
+      return () => clearInterval(interval);
+    }, delay);
+    
+    return () => clearTimeout(timeout);
+  }, [text, delay]);
+  
+  return (
+    <span className={`typewriter-text ${className} ${isComplete ? 'complete' : ''}`}>
+      {displayText}
+      {!isComplete && <span className="cursor">{showCursor ? '|' : ''}</span>}
+    </span>
+  );
+};
+
+// Fish-eye hover effect on text
+const FishEyeText = ({ children, className }) => {
+  const [hoverPos, setHoverPos] = useState({ x: 0.5, y: 0.5 });
+  const [isHovering, setIsHovering] = useState(false);
+  const textRef = useRef(null);
+  
+  const handleMouseMove = (e) => {
+    if (!textRef.current) return;
+    const rect = textRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setHoverPos({ x, y });
+  };
+  
+  return (
+    <span 
+      ref={textRef}
+      className={`fish-eye-text ${className} ${isHovering ? 'hovering' : ''}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      style={{
+        '--hover-x': hoverPos.x,
+        '--hover-y': hoverPos.y
+      }}
+    >
+      {children}
+    </span>
+  );
+};
+
 const Hero = memo(({ scrollTo }) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const heroRef = useRef(null);
   
   useEffect(() => {
@@ -120,26 +131,43 @@ const Hero = memo(({ scrollTo }) => {
   return (
     <section id="hero" className="hero" ref={heroRef}>
       <div className="hero-background" aria-hidden="true">
-        <div 
-          className="orb orb-1"
-          style={{
-            transform: `translate(${(mousePos.x - 0.5) * -30}px, ${(mousePos.y - 0.5) * -30}px)`
-          }}
-        ></div>
-        <div 
-          className="orb orb-2"
-          style={{
-            transform: `translate(${(mousePos.x - 0.5) * 20}px, ${(mousePos.y - 0.5) * 20}px)`
-          }}
-        ></div>
-        <div className="grid-overlay"></div>
+        {/* Animated mesh gradient background */}
+        <div className="mesh-gradient">
+          <div className="mesh-blob mesh-blob-1"></div>
+          <div className="mesh-blob mesh-blob-2"></div>
+          <div className="mesh-blob mesh-blob-3"></div>
+        </div>
+        
+        {/* Subtle noise overlay */}
+        <div className="noise-overlay"></div>
+        
+        {/* Floating particles */}
+        <div className="particles" aria-hidden="true">
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i} 
+              className="particle"
+              style={{
+                '--delay': `${i * 0.5}s`,
+                '--duration': `${10 + Math.random() * 20}s`,
+                '--x': `${Math.random() * 100}%`,
+                '--y': `${Math.random() * 100}%`,
+                '--size': `${2 + Math.random() * 4}px`
+              }}
+            />
+          ))}
+        </div>
       </div>
       
       <div className="hero-content">
         <h1 className="hero-title">
-          <TextScramble text="What you seek" className="scramble-line" />
+          <FishEyeText className="line-1">
+            <TypewriterText text="What you seek" delay={300} />
+          </FishEyeText>
           <br />
-          <TextScramble text="is seeking you." className="scramble-line accent" />
+          <FishEyeText className="line-2 accent">
+            <TypewriterText text="is seeking you." delay={1200} />
+          </FishEyeText>
         </h1>
         
         <div className="hero-actions">
@@ -159,13 +187,6 @@ const Hero = memo(({ scrollTo }) => {
             Resume
           </MagneticButton>
         </div>
-      </div>
-      
-      <div className="scroll-indicator" aria-hidden="true">
-        <div className="mouse">
-          <div className="wheel"></div>
-        </div>
-        <span>Scroll to explore</span>
       </div>
     </section>
   );
