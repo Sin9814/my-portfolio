@@ -1,9 +1,44 @@
-import { memo, useState, useCallback } from 'react';
+// src/components/Contact.jsx
+import { memo, useState, useCallback, useRef, useEffect } from 'react';
 import { Icon } from './common/Icon';
 import { CONFIG } from '../config';
 
+const InputField = ({ type, name, placeholder, value, onChange, required, isTextarea }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
+  const inputRef = useRef(null);
+  
+  useEffect(() => {
+    setHasValue(value.length > 0);
+  }, [value]);
+  
+  const Component = isTextarea ? 'textarea' : 'input';
+  
+  return (
+    <div className={`input-wrapper ${isFocused ? 'focused' : ''} ${hasValue ? 'has-value' : ''}`}>
+      <Component
+        ref={inputRef}
+        type={type}
+        name={name}
+        placeholder=" "
+        value={value}
+        onChange={onChange}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        required={required}
+        rows={isTextarea ? 6 : undefined}
+      />
+      <label className="input-label">{placeholder}</label>
+      <div className="input-border"></div>
+      <div className="input-glow"></div>
+    </div>
+  );
+};
+
 const Contact = memo(() => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -12,9 +47,19 @@ const Contact = memo(() => {
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    const subject = `Portfolio Contact from ${formData.name}`;
-    const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0A%0D%0AMessage:%0D%0A${formData.message}`;
-    window.location.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+      const subject = `Portfolio Contact from ${formData.name}`;
+      const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0A%0D%0AMessage:%0D%0A${formData.message}`;
+      window.location.href = `mailto:${CONFIG.email}?subject=${subject}&body=${body}`;
+      
+      setIsSubmitting(false);
+      setShowSuccess(true);
+      setFormData({ name: '', email: '', message: '' });
+      
+      setTimeout(() => setShowSuccess(false), 3000);
+    }, 800);
   }, [formData]);
 
   return (
@@ -25,7 +70,6 @@ const Contact = memo(() => {
         </header>
 
         <div className="contact-grid">
-          {/* Left side - Text */}
           <div className="contact-text">
             <p className="contact-description">
               Let us explore opportunities together. I'm available for full-time roles 
@@ -34,88 +78,69 @@ const Contact = memo(() => {
             <p className="contact-subtext">
               Suggestions and friendly greetings are also welcome. Let's connect.
             </p>
+            
+            <div className="contact-links">
+              <a href={`mailto:${CONFIG.email}`} className="contact-link">
+                <span className="link-icon"><Icon name="Mail" size={18} /></span>
+                <span className="link-text">{CONFIG.email}</span>
+                <span className="link-arrow">→</span>
+              </a>
+            </div>
           </div>
 
-          {/* Right side - Form */}
           <form className="contact-form" onSubmit={handleSubmit}>
-            <div className="form-row">
-              <input
-                type="text"
-                name="name"
-                placeholder="Name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <textarea
-              name="message"
-              rows="6"
-              placeholder="Your message..."
-              value={formData.message}
-              onChange={handleChange}
-              required
-            />
-            <button type="submit" className="btn-submit">
-              <Icon name="Send" size={16} /> Send Message
-            </button>
+            {showSuccess ? (
+              <div className="form-success">
+                <div className="success-icon">
+                  <Icon name="CheckCircle" size={48} />
+                </div>
+                <h3>Message Ready!</h3>
+                <p>Opening your email client...</p>
+              </div>
+            ) : (
+              <>
+                <div className="form-row">
+                  <InputField
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                  <InputField
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <InputField
+                  isTextarea
+                  name="message"
+                  placeholder="Your message..."
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                />
+                <button 
+                  type="submit" 
+                  className={`btn-submit ${isSubmitting ? 'submitting' : ''}`}
+                  disabled={isSubmitting}
+                >
+                  <span className="btn-text">
+                    <Icon name="Send" size={16} /> 
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </span>
+                  <span className="btn-loader"></span>
+                </button>
+              </>
+            )}
           </form>
         </div>
       </div>
-
-      <style>{`
-        .contact-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: var(--space-3xl);
-          align-items: start;
-        }
-        
-        .contact-text {
-          max-width: 500px;
-        }
-        
-        .contact-description {
-          font-size: 1.25rem;
-          line-height: 1.8;
-          color: var(--text-secondary);
-          margin-bottom: var(--space-lg);
-        }
-        
-        .contact-subtext {
-          font-size: 1.125rem;
-          line-height: 1.8;
-          color: var(--text-muted);
-        }
-        
-        .contact-form {
-          max-width: none;
-        }
-        
-        /* Mobile: Stack vertically */
-        @media (max-width: 768px) {
-          .contact-grid {
-            grid-template-columns: 1fr;
-            gap: var(--space-xl);
-          }
-          
-          .contact-description {
-            font-size: 1.1rem;
-          }
-          
-          .contact-subtext {
-            font-size: 1rem;
-          }
-        }
-      `}</style>
     </section>
   );
 });

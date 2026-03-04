@@ -1,8 +1,73 @@
-import { memo } from 'react';
+// src/components/About.jsx
+import { memo, useEffect, useRef, useState } from 'react';
 import { Icon } from './common/Icon.jsx';
 import { CONFIG } from '../config.js';
 
+const AnimatedCounter = ({ value, suffix = '', label }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isVisible]);
+  
+  useEffect(() => {
+    if (!isVisible) return;
+    
+    const numValue = parseInt(value.replace(/\D/g, '')) || 0;
+    const duration = 2000;
+    const steps = 60;
+    const increment = numValue / steps;
+    let current = 0;
+    let step = 0;
+    
+    const timer = setInterval(() => {
+      step++;
+      current = Math.min(Math.floor(increment * step), numValue);
+      setCount(current);
+      
+      if (step >= steps) {
+        clearInterval(timer);
+        setCount(numValue);
+      }
+    }, duration / steps);
+    
+    return () => clearInterval(timer);
+  }, [isVisible, value]);
+  
+  const displayValue = value.includes('M') ? `${count}M+` : 
+                     value.includes('+') ? `${count}+` : 
+                     value.includes('%') ? `${count}%` : count;
+  
+  return (
+    <div ref={ref} className="stat-item">
+      <span className="stat-value">{isVisible ? displayValue : '0'}</span>
+      <span className="stat-label">{label}</span>
+    </div>
+  );
+};
+
 const About = memo(() => {
+  const [hoveredTag, setHoveredTag] = useState(null);
+  
+  const tags = [
+    { id: 'company', icon: 'Building', label: CONFIG.company },
+    { id: 'role', icon: 'Code2', label: 'Java Developer' },
+    { id: 'exp', icon: 'Briefcase', label: '2+ Years Experience' },
+    { id: 'cert', icon: 'Cloud', label: 'Azure AZ-900 certified' }
+  ];
+  
   return (
     <section id="about" className="section">
       <div className="container">
@@ -11,33 +76,43 @@ const About = memo(() => {
         </header>
 
         <div className="about-content">
-          {/* Highlights moved up - below heading, above text */}
           <div className="about-highlights">
-            <div className="highlight-tag">
-              <Icon name="Building" size={16} />
-              <span>{CONFIG.company}</span>
-            </div>
-            <div className="highlight-tag">
-              <Icon name="Code2" size={16} />
-              <span>Java Developer</span>
-            </div>
-            <div className="highlight-tag">
-              <Icon name="Briefcase" size={16} />
-              <span>2+ Years Experience</span>
-            </div>
-            <div className="highlight-tag">
-              <Icon name="Cloud" size={16} />
-              <span>Azure AZ-900 certified</span>
-            </div>
+            {tags.map((tag, idx) => (
+              <div 
+                key={tag.id}
+                className={`highlight-tag ${hoveredTag === tag.id ? 'active' : ''}`}
+                style={{ 
+                  animationDelay: `${idx * 100}ms`,
+                  transform: hoveredTag === tag.id ? 'translateY(-4px) scale(1.02)' : 'translateY(0)'
+                }}
+                onMouseEnter={() => setHoveredTag(tag.id)}
+                onMouseLeave={() => setHoveredTag(null)}
+              >
+                <Icon name={tag.icon} size={16} />
+                <span>{tag.label}</span>
+                <div className="tag-glow"></div>
+              </div>
+            ))}
           </div>
 
-          
-
-          <p className="about-description">
-            Currently working as a Backend Developer at Tata Consultancy Services, contributing to backend systems for DGCA (Directorate General of Civil Aviation) and BCAS (Bureau of Civil Aviation Security), supporting national-level aviation regulatory and security operations.
-</p><p className="about-description">
-I design, develop, and maintain REST APIs using Java and Spring Boot, improve and refactor legacy services for better structure and maintainability, optimize high-usage SQL queries for performance, and resolve production issues through structured debugging and log analysis. My work focuses on building reliable, maintainable backend systems that support critical real-world operations.
+          <div className="about-text-reveal">
+            <p className="about-description">
+              Currently working as a <span className="highlight-text">Backend Developer</span> at{' '}
+              <span className="highlight-text">Tata Consultancy Services</span>, contributing to backend systems for{' '}
+              <span className="highlight-text">DGCA</span> (Directorate General of Civil Aviation) and{' '}
+              <span className="highlight-text">BCAS</span> (Bureau of Civil Aviation Security), supporting national-level aviation regulatory and security operations.
             </p>
+            <p className="about-description">
+              I design, develop, and maintain <span className="highlight-text">REST APIs</span> using Java and Spring Boot, improve and refactor legacy services for better structure and maintainability, optimize high-usage <span className="highlight-text">SQL queries</span> for performance, and resolve production issues through structured debugging and log analysis. My work focuses on building <span className="highlight-text">reliable, maintainable</span> backend systems that support critical real-world operations.
+            </p>
+          </div>
+          
+          <div className="about-stats">
+            <AnimatedCounter value="10+" label="Production Services" />
+            <AnimatedCounter value="1M+" label="Weekly DB Queries" />
+            <AnimatedCounter value="DAW" label="Module Lead" />
+            <AnimatedCounter value="0" label="Downtime (MIS)" />
+          </div>
         </div>
       </div>
     </section>

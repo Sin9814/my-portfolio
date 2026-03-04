@@ -1,51 +1,83 @@
-import { useEffect, memo } from 'react';
+// src/components/Navbar.jsx
+import { useEffect, memo, useState, useRef } from 'react';
 import { Icon } from './common/Icon.jsx';
 import { CONFIG, NAV_LINKS } from '../config.js';
 
 const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, activeSection }) => {
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({});
+  const navRef = useRef(null);
+  const itemRefs = useRef({});
+  
   useEffect(() => {
-    // Sync with active section
+    const activeItem = itemRefs.current[activeSection];
+    if (activeItem && navRef.current) {
+      const navRect = navRef.current.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      setIndicatorStyle({
+        top: itemRect.top - navRect.top,
+        height: itemRect.height,
+        opacity: 1
+      });
+    }
   }, [activeSection]);
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className={`sidebar ${scrolled ? 'scrolled' : ''}`} aria-label="Main navigation">
         <div className="sidebar-content">
           <a 
-  href="#hero" 
-  className="logo" 
-  onClick={(e) => { e.preventDefault(); scrollTo('hero'); }}
-  aria-label="Go to home"
->
-  <span className="logo-text">Sakshi Kataria</span>
-</a>
+            href="#hero" 
+            className="logo" 
+            onClick={(e) => { e.preventDefault(); scrollTo('hero'); }}
+            aria-label="Go to home"
+          >
+            <span className="logo-text">
+              {'Sakshi Kataria'.split('').map((char, i) => (
+                <span key={i} className="logo-char" style={{ animationDelay: `${i * 30}ms` }}>
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+          </a>
 
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" ref={navRef}>
+            <div className="nav-indicator" style={indicatorStyle}></div>
             {NAV_LINKS.map(link => (
               <button
                 key={link.id}
-                className={`nav-item ${activeSection === link.id ? 'active' : ''}`}
+                ref={el => itemRefs.current[link.id] = el}
+                className={`nav-item ${activeSection === link.id ? 'active' : ''} ${hoveredItem === link.id ? 'hovered' : ''}`}
                 onClick={() => scrollTo(link.id)}
+                onMouseEnter={() => setHoveredItem(link.id)}
+                onMouseLeave={() => setHoveredItem(null)}
                 aria-current={activeSection === link.id ? 'location' : undefined}
               >
                 <span className="nav-dot" aria-hidden="true"></span>
-                <span>{link.label}</span>
+                <span className="nav-label">{link.label}</span>
+                <span className="nav-arrow">→</span>
               </button>
             ))}
           </nav>
 
           <div className="sidebar-bottom">
             <div className="sidebar-social">
-              <a href={CONFIG.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <Icon name="Linkedin" size={18} />
-              </a>
-              <a href={CONFIG.social.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                <Icon name="Github" size={18} />
-              </a>
-              <a href={`mailto:${CONFIG.email}`} aria-label="Email">
-                <Icon name="Mail" size={18} />
-              </a>
+              {[
+                { icon: 'Linkedin', href: CONFIG.social.linkedin, label: 'LinkedIn' },
+                { icon: 'Github', href: CONFIG.social.github, label: 'GitHub' },
+                { icon: 'Mail', href: `mailto:${CONFIG.email}`, label: 'Email' }
+              ].map((social, idx) => (
+                <a 
+                  key={social.label}
+                  href={social.href} 
+                  target={social.href.startsWith('mailto') ? undefined : '_blank'}
+                  rel={social.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+                  aria-label={social.label}
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <Icon name={social.icon} size={18} />
+                </a>
+              ))}
             </div>
             
             <a 
@@ -54,19 +86,20 @@ const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, ac
               rel="noopener noreferrer"
               className="resume-btn"
             >
-              <Icon name="ExternalLink" size={14} /> Resume
+              <Icon name="ExternalLink" size={14} /> 
+              <span className="resume-text">Resume</span>
             </a>
           </div>
         </div>
       </aside>
 
-      {/* Mobile Header - Shows "SK" abbreviation */}
       <header className="mobile-header">
         <a href="#hero" 
            className="mobile-logo" 
            onClick={(e) => { e.preventDefault(); scrollTo('hero'); }}
         >
-          SK
+          <span className="ml-char">S</span>
+          <span className="ml-char">K</span>
         </a>
         <button 
           className="mobile-menu-toggle" 
@@ -74,20 +107,25 @@ const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, ac
           aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileMenuOpen}
         >
-          <Icon name={mobileMenuOpen ? 'X' : 'Menu'} size={24} />
+          <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </button>
       </header>
       
-      {/* Mobile Menu */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <nav className="mobile-nav">
-          {NAV_LINKS.map(link => (
+          {NAV_LINKS.map((link, idx) => (
             <button
               key={link.id}
               className={`mobile-nav-link ${activeSection === link.id ? 'active' : ''}`}
               onClick={() => scrollTo(link.id)}
+              style={{ animationDelay: `${idx * 50}ms` }}
             >
-              {link.label}
+              <span className="m-link-num">0{idx + 1}</span>
+              <span className="m-link-text">{link.label}</span>
             </button>
           ))}
         </nav>
