@@ -11,7 +11,7 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
     const rect = btnRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    setPosition({ x: x * 0.2, y: y * 0.2 });
+    setPosition({ x: x * 0.3, y: y * 0.3 });
   };
   
   const handleMouseLeave = () => {
@@ -36,74 +36,39 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
   );
 };
 
-// Elegant typewriter effect
-const TypewriterText = ({ text, className, delay = 0 }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
-  const [isComplete, setIsComplete] = useState(false);
+// DRAMATIC ZOOM TEXT EFFECT - No cursor change, pure scale transform
+const ZoomText = ({ text, className, delay = 0 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef(null);
   
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index <= text.length) {
-          setDisplayText(text.slice(0, index));
-          index++;
-        } else {
-          clearInterval(interval);
-          setIsComplete(true);
-          setTimeout(() => setShowCursor(false), 2000);
-        }
-      }, 60);
-      
-      return () => clearInterval(interval);
-    }, delay);
-    
-    return () => clearTimeout(timeout);
-  }, [text, delay]);
+    const timer = setTimeout(() => setIsVisible(true), delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
   
-  return (
-    <span className={`typewriter-text ${className} ${isComplete ? 'complete' : ''}`}>
-      {displayText}
-      {!isComplete && <span className="cursor">{showCursor ? '|' : ''}</span>}
-    </span>
-  );
-};
-
-// Magnifying glass text effect
-const MagnifyText = ({ children, className }) => {
-  const containerRef = useRef(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-  
-  const handleMouseMove = useCallback((e) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  }, []);
+  // Split text into characters for individual animation
+  const characters = text.split('');
   
   return (
     <span 
       ref={containerRef}
-      className={`magnify-text ${className} ${isHovering ? 'hovering' : ''}`}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      style={{
-        '--mouse-x': `${mousePos.x}px`,
-        '--mouse-y': `${mousePos.y}px`
-      }}
+      className={`zoom-text-container ${className} ${isHovered ? 'hovered' : ''} ${isVisible ? 'visible' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {children}
-      {isHovering && (
-        <span className="magnify-glass" style={{
-          left: mousePos.x,
-          top: mousePos.y
-        }} />
-      )}
+      {characters.map((char, index) => (
+        <span 
+          key={index} 
+          className="zoom-char"
+          style={{ 
+            animationDelay: `${delay + (index * 30)}ms`,
+            transitionDelay: `${index * 15}ms`
+          }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      ))}
     </span>
   );
 };
@@ -113,13 +78,12 @@ const Hero = memo(({ scrollTo }) => {
     <section id="hero" className="hero">
       <div className="hero-content">
         <h1 className="hero-title">
-          <MagnifyText className="line-1">
-            <TypewriterText text="What you seek" delay={300} />
-          </MagnifyText>
-          <br />
-          <MagnifyText className="line-2 accent">
-            <TypewriterText text="is seeking you." delay={1200} />
-          </MagnifyText>
+          <div className="title-line">
+            <ZoomText text="What you seek" className="line-1" delay={300} />
+          </div>
+          <div className="title-line">
+            <ZoomText text="is seeking you." className="line-2 accent" delay={800} />
+          </div>
         </h1>
         
         <div className="hero-actions">

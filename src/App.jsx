@@ -10,6 +10,7 @@ import Work from './components/Work.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import AntigravityBackground from './components/AntigravityBackground.jsx';
+import SilkBackground from './components/SilkBackground.jsx';
 import { NAV_LINKS } from './config.js';
 import './styles/global.css';
 
@@ -32,6 +33,7 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [showSilk, setShowSilk] = useState(false);
 
   const scrollTo = useCallback((id) => {
     const element = document.getElementById(id);
@@ -55,6 +57,10 @@ function App() {
       const y = window.scrollY;
       setScrolled(y > 50);
       setShowScrollTop(y > 500);
+      
+      // Switch to silk background after hero section
+      const heroHeight = window.innerHeight;
+      setShowSilk(y > heroHeight * 0.5);
 
       const scrollPosition = y + 200;
       const sections = NAV_LINKS.map(link => link.id);
@@ -93,7 +99,13 @@ function App() {
 
   return (
     <div className="app">
-      <AntigravityBackground />
+      {/* Dual background system */}
+      <div className={`bg-layer antigravity-layer ${!showSilk ? 'active' : ''}`}>
+        <AntigravityBackground />
+      </div>
+      <div className={`bg-layer silk-layer ${showSilk ? 'active' : ''}`}>
+        <SilkBackground />
+      </div>
       
       <Navbar 
         scrolled={scrolled} 
