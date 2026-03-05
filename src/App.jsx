@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from 'react';
 import { useState, useEffect, useCallback, memo } from 'react';
 import { Analytics } from '@vercel/analytics/react';
@@ -8,6 +9,7 @@ import Skills from './components/Skills.jsx';
 import Work from './components/Work.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
+import AntigravityBackground from './components/AntigravityBackground.jsx';
 import { NAV_LINKS } from './config.js';
 import './styles/global.css';
 
@@ -31,23 +33,22 @@ function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
-// Change scroll offset for narrower sidebar
-const scrollTo = useCallback((id) => {
-  const element = document.getElementById(id);
-  if (element) {
-    const headerOffset = 40; // Reduced for narrower sidebar
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
-    window.scrollTo({ 
-      top: Math.max(0, offsetPosition), 
-      behavior: 'smooth' 
-    });
-    
-    window.history.pushState(null, null, `#${id}`);
-  }
-  setMobileMenuOpen(false);
-}, []);
+  const scrollTo = useCallback((id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const headerOffset = 40;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({ 
+        top: Math.max(0, offsetPosition), 
+        behavior: 'smooth' 
+      });
+      
+      window.history.pushState(null, null, `#${id}`);
+    }
+    setMobileMenuOpen(false);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,6 +93,8 @@ const scrollTo = useCallback((id) => {
 
   return (
     <div className="app">
+      <AntigravityBackground />
+      
       <Navbar 
         scrolled={scrolled} 
         mobileMenuOpen={mobileMenuOpen} 

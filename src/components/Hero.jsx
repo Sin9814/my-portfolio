@@ -1,5 +1,5 @@
 // src/components/Hero.jsx
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { Icon } from './common/Icon.jsx';
 
 const MagneticButton = ({ children, className, onClick, ...props }) => {
@@ -36,7 +36,7 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
   );
 };
 
-// Elegant typewriter effect - professional, not glitchy
+// Elegant typewriter effect
 const TypewriterText = ({ text, className, delay = 0 }) => {
   const [displayText, setDisplayText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
@@ -52,10 +52,9 @@ const TypewriterText = ({ text, className, delay = 0 }) => {
         } else {
           clearInterval(interval);
           setIsComplete(true);
-          // Blink cursor a few times then hide
           setTimeout(() => setShowCursor(false), 2000);
         }
-      }, 60); // Slower, more elegant
+      }, 60);
       
       return () => clearInterval(interval);
     }, delay);
@@ -71,103 +70,56 @@ const TypewriterText = ({ text, className, delay = 0 }) => {
   );
 };
 
-// Fish-eye hover effect on text
-const FishEyeText = ({ children, className }) => {
-  const [hoverPos, setHoverPos] = useState({ x: 0.5, y: 0.5 });
+// Magnifying glass text effect
+const MagnifyText = ({ children, className }) => {
+  const containerRef = useRef(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-  const textRef = useRef(null);
   
-  const handleMouseMove = (e) => {
-    if (!textRef.current) return;
-    const rect = textRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setHoverPos({ x, y });
-  };
+  const handleMouseMove = useCallback((e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  }, []);
   
   return (
     <span 
-      ref={textRef}
-      className={`fish-eye-text ${className} ${isHovering ? 'hovering' : ''}`}
+      ref={containerRef}
+      className={`magnify-text ${className} ${isHovering ? 'hovering' : ''}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       style={{
-        '--hover-x': hoverPos.x,
-        '--hover-y': hoverPos.y
+        '--mouse-x': `${mousePos.x}px`,
+        '--mouse-y': `${mousePos.y}px`
       }}
     >
       {children}
+      {isHovering && (
+        <span className="magnify-glass" style={{
+          left: mousePos.x,
+          top: mousePos.y
+        }} />
+      )}
     </span>
   );
 };
 
 const Hero = memo(({ scrollTo }) => {
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
-  const heroRef = useRef(null);
-  
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!heroRef.current) return;
-      const rect = heroRef.current.getBoundingClientRect();
-      setMousePos({
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height
-      });
-    };
-    
-    const hero = heroRef.current;
-    if (hero) {
-      hero.addEventListener('mousemove', handleMouseMove, { passive: true });
-    }
-    
-    return () => {
-      if (hero) {
-        hero.removeEventListener('mousemove', handleMouseMove);
-      }
-    };
-  }, []);
-  
   return (
-    <section id="hero" className="hero" ref={heroRef}>
-      <div className="hero-background" aria-hidden="true">
-        {/* Animated mesh gradient background */}
-        <div className="mesh-gradient">
-          <div className="mesh-blob mesh-blob-1"></div>
-          <div className="mesh-blob mesh-blob-2"></div>
-          <div className="mesh-blob mesh-blob-3"></div>
-        </div>
-        
-        {/* Subtle noise overlay */}
-        <div className="noise-overlay"></div>
-        
-        {/* Floating particles */}
-        <div className="particles" aria-hidden="true">
-          {[...Array(20)].map((_, i) => (
-            <div 
-              key={i} 
-              className="particle"
-              style={{
-                '--delay': `${i * 0.5}s`,
-                '--duration': `${10 + Math.random() * 20}s`,
-                '--x': `${Math.random() * 100}%`,
-                '--y': `${Math.random() * 100}%`,
-                '--size': `${2 + Math.random() * 4}px`
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
+    <section id="hero" className="hero">
       <div className="hero-content">
         <h1 className="hero-title">
-          <FishEyeText className="line-1">
+          <MagnifyText className="line-1">
             <TypewriterText text="What you seek" delay={300} />
-          </FishEyeText>
+          </MagnifyText>
           <br />
-          <FishEyeText className="line-2 accent">
+          <MagnifyText className="line-2 accent">
             <TypewriterText text="is seeking you." delay={1200} />
-          </FishEyeText>
+          </MagnifyText>
         </h1>
         
         <div className="hero-actions">

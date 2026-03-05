@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx
+// src/components/Navbar.jsx - Remove numbering
 import { useEffect, memo, useState, useRef } from 'react';
 import { Icon } from './common/Icon.jsx';
 import { CONFIG, NAV_LINKS } from '../config.js';
@@ -124,7 +124,7 @@ const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, ac
               onClick={() => scrollTo(link.id)}
               style={{ animationDelay: `${idx * 50}ms` }}
             >
-              <span className="m-link-num">0{idx + 1}</span>
+              {/* Numbering removed - just the label */}
               <span className="m-link-text">{link.label}</span>
             </button>
           ))}
