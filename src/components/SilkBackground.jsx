@@ -3,122 +3,187 @@ import { memo, useEffect, useRef } from 'react';
 
 const SilkBackground = memo(() => {
   const canvasRef = useRef(null);
-  const timeRef = useRef(0);
+  const animationRef = useRef(null);
   
+  // Configuration matching ReactBits
+  const config = {
+    speed: 5,
+    scale: 1,
+    color: '#4ade80', // Green to match theme, or use '#7B7481' for gray
+    noiseIntensity: 1.5,
+    rotation: 0
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    let animationId;
     let width, height;
+    let time = 0;
     
     const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
     };
     
     resize();
     window.addEventListener('resize', resize);
     
-    // Noise function for silk effect
-    const noise = (x, y, t) => {
-      const sin = Math.sin;
-      const cos = Math.cos;
-      return (
-        sin(x * 0.01 + t) * 0.5 +
-        sin(y * 0.01 + t * 0.5) * 0.3 +
-        sin((x + y) * 0.005 + t * 0.3) * 0.2 +
-        sin(x * 0.02 - y * 0.01 + t * 0.7) * 0.15
-      );
+    // Parse color
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 123, g: 116, b: 129 };
+    };
+    
+    const rgb = hexToRgb(config.color);
+    
+    // Simplex noise implementation
+    const perm = new Uint8Array(512);
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) p[i] = i;
+    for (let i = 255; i > 0; i--) {
+      const n = Math.floor(Math.random() * (i + 1));
+      [p[i], p[n]] = [p[n], p[i]];
+    }
+    for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+    
+    const grad3 = [
+      [1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0],
+      [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1],
+      [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1]
+    ];
+    
+    const dot = (g, x, y) => g[0] * x + g[1] * y;
+    
+    const noise = (xin, yin) => {
+      let n0, n1, n2;
+      const F2 = 0.5 * (Math.sqrt(3) - 1);
+      const s = (xin + yin) * F2;
+      const i = Math.floor(xin + s);
+      const j = Math.floor(yin + s);
+      const G2 = (3 - Math.sqrt(3)) / 6;
+      const t = (i + j) * G2;
+      const X0 = i - t;
+      const Y0 = j - t;
+      const x0 = xin - X0;
+      const y0 = yin - Y0;
+      let i1, j1;
+      if (x0 > y0) { i1 = 1; j1 = 0; } else { i1 = 0; j1 = 1; }
+      const x1 = x0 - i1 + G2;
+      const y1 = y0 - j1 + G2;
+      const x2 = x0 - 1 + 2 * G2;
+      const y2 = y0 - 1 + 2 * G2;
+      const ii = i & 255;
+      const jj = j & 255;
+      const gi0 = perm[ii + perm[jj]] % 12;
+      const gi1 = perm[ii + i1 + perm[jj + j1]] % 12;
+      const gi2 = perm[ii + 1 + perm[jj + 1]] % 12;
+      let t0 = 0.5 - x0 * x0 - y0 * y0;
+      if (t0 < 0) n0 = 0;
+      else {
+        t0 *= t0;
+        n0 = t0 * t0 * dot(grad3[gi0], x0, y0);
+      }
+      let t1 = 0.5 - x1 * x1 - y1 * y1;
+      if (t1 < 0) n1 = 0;
+      else {
+        t1 *= t1;
+        n1 = t1 * t1 * dot(grad3[gi1], x1, y1);
+      }
+      let t2 = 0.5 - x2 * x2 - y2 * y2;
+      if (t2 < 0) n2 = 0;
+      else {
+        t2 *= t2;
+        n2 = t2 * t2 * dot(grad3[gi2], x2, y2);
+      }
+      return 70 * (n0 + n1 + n2);
     };
     
     const animate = () => {
-      timeRef.current += 0.005;
-      const t = timeRef.current;
-      
-      // Create silk-like gradient background
-      const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#0a0a0a');
-      gradient.addColorStop(0.5, '#0f0f0f');
-      gradient.addColorStop(1, '#0a0a0a');
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, width, height);
       
-      // Draw silk waves
-      const waves = 5;
-      const amplitude = height * 0.15;
+      time += config.speed * 0.001;
       
-      for (let w = 0; w < waves; w++) {
-        ctx.beginPath();
-        const waveOffset = (w / waves) * height;
-        
-        for (let x = 0; x <= width; x += 5) {
-          const nx = x * 0.003;
-          const ny = waveOffset * 0.005;
-          const n = noise(x, waveOffset, t + w * 0.5);
-          
-          const y = waveOffset + n * amplitude + Math.sin(x * 0.01 + t + w) * 30;
-          
-          if (x === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-        
-        // Silk-like gradient stroke
-        const alpha = 0.03 - (w * 0.005);
-        const strokeGradient = ctx.createLinearGradient(0, 0, width, 0);
-        strokeGradient.addColorStop(0, `rgba(74, 222, 128, 0)`);
-        strokeGradient.addColorStop(0.5, `rgba(74, 222, 128, ${alpha})`);
-        strokeGradient.addColorStop(1, `rgba(74, 222, 128, 0)`);
-        
-        ctx.strokeStyle = strokeGradient;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Add flowing fill
-        ctx.lineTo(width, height);
-        ctx.lineTo(0, height);
-        ctx.closePath();
-        
-        const fillGradient = ctx.createLinearGradient(0, waveOffset - amplitude, 0, waveOffset + amplitude);
-        fillGradient.addColorStop(0, `rgba(74, 222, 128, 0)`);
-        fillGradient.addColorStop(0.5, `rgba(74, 222, 128, ${alpha * 0.3})`);
-        fillGradient.addColorStop(1, `rgba(74, 222, 128, 0)`);
-        ctx.fillStyle = fillGradient;
-        ctx.fill();
-      }
-      
-      // Subtle noise overlay
       const imageData = ctx.getImageData(0, 0, width, height);
       const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const noiseVal = (Math.random() - 0.5) * 8;
-        data[i] = Math.max(0, Math.min(255, data[i] + noiseVal));
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noiseVal));
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noiseVal));
-      }
-      ctx.putImageData(imageData, 0, 0);
       
-      animationId = requestAnimationFrame(animate);
+      const scale = config.scale * 0.002;
+      const rotationRad = (config.rotation * Math.PI) / 180;
+      const cos = Math.cos(rotationRad);
+      const sin = Math.sin(rotationRad);
+      
+      for (let y = 0; y < height; y += 2) {
+        for (let x = 0; x < width; x += 2) {
+          const rx = x * cos - y * sin;
+          const ry = x * sin + y * cos;
+          
+          const n = noise(rx * scale + time, ry * scale);
+          const intensity = (n + 1) * 0.5 * config.noiseIntensity;
+          
+          const idx = (y * width + x) * 4;
+          const alpha = Math.min(255, intensity * 80);
+          
+          data[idx] = rgb.r;
+          data[idx + 1] = rgb.g;
+          data[idx + 2] = rgb.b;
+          data[idx + 3] = alpha;
+          
+          // Fill 2x2 block for performance
+          if (x + 1 < width) {
+            data[idx + 4] = rgb.r;
+            data[idx + 5] = rgb.g;
+            data[idx + 6] = rgb.b;
+            data[idx + 7] = alpha;
+          }
+          if (y + 1 < height) {
+            const idx2 = ((y + 1) * width + x) * 4;
+            data[idx2] = rgb.r;
+            data[idx2 + 1] = rgb.g;
+            data[idx2 + 2] = rgb.b;
+            data[idx2 + 3] = alpha;
+          }
+        }
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      animationRef.current = requestAnimationFrame(animate);
     };
     
     animate();
     
     return () => {
       window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
-  }, []);
-  
+  }, [config]);
+
   return (
     <canvas 
       ref={canvasRef} 
       className="silk-bg"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        opacity: 0.6
+      }}
       aria-hidden="true"
     />
   );

@@ -36,37 +36,57 @@ const MagneticButton = ({ children, className, onClick, ...props }) => {
   );
 };
 
-// DRAMATIC ZOOM TEXT EFFECT - No cursor change, pure scale transform
+// FIXED: Smoother zoom with better hover detection
 const ZoomText = ({ text, className, delay = 0 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef(null);
+  const leaveTimeoutRef = useRef(null);
   
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), delay);
     return () => clearTimeout(timer);
   }, [delay]);
   
-  // Split text into characters for individual animation
-  const characters = text.split('');
+  // Split into words first, then characters for better layout
+  const words = text.split(' ');
+  
+  const handleMouseEnter = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+  
+  const handleMouseLeave = () => {
+    // Small delay to prevent flickering when moving between characters
+    leaveTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 50);
+  };
   
   return (
     <span 
       ref={containerRef}
       className={`zoom-text-container ${className} ${isHovered ? 'hovered' : ''} ${isVisible ? 'visible' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      {characters.map((char, index) => (
-        <span 
-          key={index} 
-          className="zoom-char"
-          style={{ 
-            animationDelay: `${delay + (index * 30)}ms`,
-            transitionDelay: `${index * 15}ms`
-          }}
-        >
-          {char === ' ' ? '\u00A0' : char}
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex} className="zoom-word">
+          {word.split('').map((char, charIndex) => (
+            <span 
+              key={`${wordIndex}-${charIndex}`} 
+              className="zoom-char"
+              style={{ 
+                animationDelay: `${delay + ((wordIndex * word.length + charIndex) * 25)}ms`,
+              }}
+            >
+              {char}
+            </span>
+          ))}
+          {wordIndex < words.length - 1 && <span className="zoom-space">&nbsp;</span>}
         </span>
       ))}
     </span>

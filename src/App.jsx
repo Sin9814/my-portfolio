@@ -58,9 +58,9 @@ function App() {
       setScrolled(y > 50);
       setShowScrollTop(y > 500);
       
-      // Switch to silk background after hero section
+      // Switch to silk background after hero section (100vh)
       const heroHeight = window.innerHeight;
-      setShowSilk(y > heroHeight * 0.5);
+      setShowSilk(y > heroHeight * 0.8);
 
       const scrollPosition = y + 200;
       const sections = NAV_LINKS.map(link => link.id);
@@ -99,12 +99,14 @@ function App() {
 
   return (
     <div className="app">
-      {/* Dual background system */}
-      <div className={`bg-layer antigravity-layer ${!showSilk ? 'active' : ''}`}>
-        <AntigravityBackground />
-      </div>
-      <div className={`bg-layer silk-layer ${showSilk ? 'active' : ''}`}>
-        <SilkBackground />
+      {/* Background layers */}
+      <div className="bg-container">
+        <div className={`bg-layer antigravity-layer ${!showSilk ? 'active' : 'hidden'}`}>
+          <AntigravityBackground />
+        </div>
+        <div className={`bg-layer silk-layer ${showSilk ? 'active' : 'hidden'}`}>
+          <SilkBackground />
+        </div>
       </div>
       
       <Navbar 
