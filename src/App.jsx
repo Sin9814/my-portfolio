@@ -33,6 +33,7 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [showAntigravity, setShowAntigravity] = useState(false);
 
   const scrollTo = useCallback((id) => {
     const element = document.getElementById(id);
@@ -56,6 +57,10 @@ function App() {
       const y = window.scrollY;
       setScrolled(y > 50);
       setShowScrollTop(y > 500);
+      
+      // Show antigravity when scrolled past hero (100vh)
+      const heroHeight = window.innerHeight;
+      setShowAntigravity(y > heroHeight * 0.5);
 
       const scrollPosition = y + 200;
       const sections = NAV_LINKS.map(link => link.id);
@@ -100,7 +105,7 @@ function App() {
       </div>
 
       {/* Fixed Antigravity Background - For Content Sections */}
-      <div className="content-background">
+      <div className={`content-background ${showAntigravity ? 'visible' : ''}`}>
         <AntigravityBackground />
       </div>
 
