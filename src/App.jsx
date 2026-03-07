@@ -9,8 +9,8 @@ import Skills from './components/Skills.jsx';
 import Work from './components/Work.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
+import BalatroBackground from './components/BalatroBackground.jsx';
 import AntigravityBackground from './components/AntigravityBackground.jsx';
-import SilkBackground from './components/SilkBackground.jsx';
 import { NAV_LINKS } from './config.js';
 import './styles/global.css';
 
@@ -33,7 +33,6 @@ function App() {
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [showSilk, setShowSilk] = useState(false);
 
   const scrollTo = useCallback((id) => {
     const element = document.getElementById(id);
@@ -57,10 +56,6 @@ function App() {
       const y = window.scrollY;
       setScrolled(y > 50);
       setShowScrollTop(y > 500);
-      
-      // Switch to silk background after hero section (100vh)
-      const heroHeight = window.innerHeight;
-      setShowSilk(y > heroHeight * 0.8);
 
       const scrollPosition = y + 200;
       const sections = NAV_LINKS.map(link => link.id);
@@ -99,16 +94,17 @@ function App() {
 
   return (
     <div className="app">
-      {/* Background layers */}
-      <div className="bg-container">
-        <div className={`bg-layer antigravity-layer ${!showSilk ? 'active' : 'hidden'}`}>
-          <AntigravityBackground />
-        </div>
-        <div className={`bg-layer silk-layer ${showSilk ? 'active' : 'hidden'}`}>
-          <SilkBackground />
-        </div>
+      {/* Fixed Balatro Background - Only for Hero */}
+      <div className="hero-background">
+        <BalatroBackground />
       </div>
-      
+
+      {/* Fixed Antigravity Background - For Content Sections */}
+      <div className="content-background">
+        <AntigravityBackground />
+      </div>
+
+      {/* Navigation */}
       <Navbar 
         scrolled={scrolled} 
         mobileMenuOpen={mobileMenuOpen} 
@@ -117,13 +113,21 @@ function App() {
         activeSection={activeSection}
       />
       
+      {/* Main Content */}
       <main className="main-content">
-        <Hero scrollTo={scrollTo} />
-        <About />
-        <Skills />
-        <Work />
-        <Contact />
-        <Footer />
+        {/* Hero Section - 100vh with Balatro bg */}
+        <section id="hero" className="hero-section">
+          <Hero scrollTo={scrollTo} />
+        </section>
+
+        {/* Content Sections - Black bg with Antigravity */}
+        <div className="content-sections">
+          <About />
+          <Skills />
+          <Work />
+          <Contact />
+          <Footer />
+        </div>
       </main>
       
       <ScrollToTop 

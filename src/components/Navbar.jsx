@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx - Remove numbering
+// src/components/Navbar.jsx - Remove dots from nav
 import { useEffect, memo, useState, useRef } from 'react';
 import { Icon } from './common/Icon.jsx';
 import { CONFIG, NAV_LINKS } from '../config.js';
@@ -53,7 +53,7 @@ const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, ac
                 onMouseLeave={() => setHoveredItem(null)}
                 aria-current={activeSection === link.id ? 'location' : undefined}
               >
-                <span className="nav-dot" aria-hidden="true"></span>
+                {/* Dots removed - only label and arrow */}
                 <span className="nav-label">{link.label}</span>
                 <span className="nav-arrow">→</span>
               </button>
@@ -124,7 +124,6 @@ const Navbar = memo(({ scrolled, mobileMenuOpen, setMobileMenuOpen, scrollTo, ac
               onClick={() => scrollTo(link.id)}
               style={{ animationDelay: `${idx * 50}ms` }}
             >
-              {/* Numbering removed - just the label */}
               <span className="m-link-text">{link.label}</span>
             </button>
           ))}
