@@ -58,9 +58,9 @@ function App() {
       setScrolled(y > 50);
       setShowScrollTop(y > 500);
       
-      // Show antigravity when scrolled past hero (100vh)
+      // Show antigravity ONLY after scrolling past hero completely
       const heroHeight = window.innerHeight;
-      setShowAntigravity(y > heroHeight * 0.5);
+      setShowAntigravity(y > heroHeight * 0.9);
 
       const scrollPosition = y + 200;
       const sections = NAV_LINKS.map(link => link.id);
@@ -99,13 +99,13 @@ function App() {
 
   return (
     <div className="app">
-      {/* Fixed Balatro Background - Only for Hero */}
+      {/* Balatro Background - Only visible on Hero */}
       <div className="hero-background">
         <BalatroBackground />
       </div>
 
-      {/* Fixed Antigravity Background - For Content Sections */}
-      <div className={`content-background ${showAntigravity ? 'visible' : ''}`}>
+      {/* Antigravity Background - Visible on ALL content sections (not hero) */}
+      <div className={`antigravity-background ${showAntigravity ? 'visible' : ''}`}>
         <AntigravityBackground />
       </div>
 
@@ -120,19 +120,29 @@ function App() {
       
       {/* Main Content */}
       <main className="main-content">
-        {/* Hero Section - 100vh with Balatro bg */}
+        {/* Hero - Has its own Balatro bg */}
         <section id="hero" className="hero-section">
           <Hero scrollTo={scrollTo} />
         </section>
 
-        {/* Content Sections - Black bg with Antigravity */}
-        <div className="content-sections">
+        {/* Content Sections - Share the Antigravity bg */}
+        <section id="about" className="section">
           <About />
+        </section>
+        
+        <section id="skills" className="section">
           <Skills />
+        </section>
+        
+        <section id="work" className="section">
           <Work />
+        </section>
+        
+        <section id="contact" className="section">
           <Contact />
-          <Footer />
-        </div>
+        </section>
+        
+        <Footer />
       </main>
       
       <ScrollToTop 
