@@ -1,6 +1,6 @@
 /* ============================================
-   SAKSHI KATARIA PORTFOLIO - v9.4
-   Fixed Background Containment + Layout
+   SAKSHI KATARIA PORTFOLIO - v9.5
+   Reduced Section Spacing
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
@@ -51,8 +51,8 @@ body {
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
   --space-xl: 4rem;
-  --space-2xl: 6rem;
-  --space-3xl: 8rem;
+  --space-2xl: 5rem; /* REDUCED: from 6rem */
+  --space-3xl: 6rem; /* REDUCED: from 8rem */
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -63,11 +63,9 @@ body {
   --duration-slow: 0.3s;
 }
 
-/* ===== BACKGROUND SYSTEM - FIXED ===== */
-
-/* Hero Background - ABSOLUTE (not fixed) to contain to hero only */
+/* ===== BACKGROUND SYSTEM ===== */
 .hero-background {
-  position: absolute; /* CHANGED: fixed -> absolute */
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -77,7 +75,6 @@ body {
   overflow: hidden;
 }
 
-/* Antigravity Background - Fixed full viewport, behind content, ALL screens */
 .antigravity-background {
   position: fixed;
   top: 0;
@@ -95,7 +92,7 @@ body {
   opacity: 1;
 }
 
-/* ===== LAYOUT - FIXED ===== */
+/* ===== LAYOUT ===== */
 .container {
   max-width: 1100px;
   margin: 0 auto;
@@ -104,23 +101,23 @@ body {
 
 .main-content {
   margin-left: 260px;
-  width: calc(100% - 260px); /* ADDED: prevent shrink */
+  width: calc(100% - 260px);
   position: relative;
   z-index: 1;
 }
 
-/* ===== HERO SECTION - FIXED ===== */
+/* ===== HERO SECTION ===== */
 .hero-section {
-  position: relative; /* ADDED: contain absolute children */
+  position: relative;
   height: 100vh;
   min-height: 100vh;
-  overflow: hidden; /* ADDED: clip background to hero bounds */
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
   background: transparent;
-  isolation: isolate; /* ADDED: create stacking context */
+  isolation: isolate;
 }
 
 .hero-wrapper {
@@ -285,17 +282,17 @@ body {
   transform: translateY(-2px);
 }
 
-/* ===== CONTENT SECTIONS ===== */
+/* ===== CONTENT SECTIONS - REDUCED SPACING ===== */
 .section {
-  min-height: 80vh;
-  padding: var(--space-3xl) 0;
+  min-height: auto; /* CHANGED: from 80vh to auto */
+  padding: var(--space-2xl) 0; /* CHANGED: from space-3xl (8rem) to space-2xl (5rem) */
   position: relative;
   scroll-margin-top: 30px;
   display: flex;
   align-items: center;
   background: transparent;
   z-index: 1;
-  width: 100%; /* ADDED */
+  width: 100%;
 }
 
 .section .container {
@@ -305,7 +302,7 @@ body {
 }
 
 .section-header {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg); /* REDUCED: from space-xl */
   max-width: 600px;
 }
 
@@ -767,8 +764,8 @@ body {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl); /* REDUCED: from space-2xl */
+  padding-bottom: var(--space-lg); /* REDUCED: from space-xl */
   border-bottom: 1px solid var(--border);
   align-items: center;
   justify-content: flex-start;
@@ -839,7 +836,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-xl);
-  padding: var(--space-md) 0;
+  padding: var(--space-md) 0; /* REDUCED: tighter padding */
   border-bottom: 1px solid var(--border);
   opacity: 0;
   transform: translateX(-20px);
@@ -1126,10 +1123,10 @@ body {
   transform: scale(1);
 }
 
-/* ===== CONTACT ===== */
+/* ===== CONTACT - REDUCED SPACING ===== */
 #contact {
   min-height: auto;
-  padding: var(--space-2xl) 0;
+  padding: var(--space-xl) 0; /* REDUCED: from space-2xl */
 }
 
 #contact.section {
@@ -1139,7 +1136,7 @@ body {
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3xl);
+  gap: var(--space-2xl); /* REDUCED: from space-3xl */
   align-items: start;
 }
 
@@ -1151,7 +1148,7 @@ body {
   font-size: 1.25rem;
   line-height: 1.8;
   color: var(--text-secondary);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md); /* REDUCED: from space-lg */
 }
 
 .contact-subtext {
@@ -1418,7 +1415,7 @@ body {
   box-shadow: 0 8px 20px var(--accent-glow);
 }
 
-/* ===== RESPONSIVE - FIXED ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .sidebar {
     display: none !important;
@@ -1445,12 +1442,9 @@ body {
   
   .contact-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-xl);
+    gap: var(--space-xl); /* REDUCED for mobile */
   }
   
-  /* REMOVED: .antigravity-background display: none - now shows on all screens */
-  
-  /* ADDED: Ensure proper container width */
   .container {
     max-width: 100%;
     padding: 0 var(--space-md);
@@ -1468,7 +1462,7 @@ body {
   }
   
   .section {
-    padding: var(--space-2xl) 0;
+    padding: var(--space-xl) 0; /* REDUCED: from space-2xl */
   }
   
   .project-card {
@@ -1490,7 +1484,7 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-sm);
-    padding: var(--space-md) 0;
+    padding: var(--space-sm) 0; /* REDUCED */
   }
   
   .skill-category {
@@ -1529,6 +1523,10 @@ body {
   
   .container {
     padding: 0 16px;
+  }
+  
+  .section {
+    padding: var(--space-lg) 0; /* FURTHER REDUCED for small screens */
   }
 }
 
