@@ -1548,3 +1548,175 @@ textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ===== SECTION VISUAL CONNECTIONS ===== */
+
+/* Remove/reduce section headers - minimal approach */
+.section-header {
+  margin-bottom: var(--space-md); /* Reduced from space-lg */
+  max-width: 600px;
+  position: relative;
+}
+
+/* Minimal header style - just accent line, no large text */
+.section-header h2 {
+  font-family: var(--font-serif);
+  font-size: 0.875rem; /* Small label style */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted); /* Muted color */
+  margin-bottom: var(--space-sm);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Accent line before header text */
+.section-header h2::before {
+  content: '';
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+/* Remove the bottom border line */
+.section-header h2::after {
+  display: none; /* Remove default underline */
+}
+
+/* Subtle section divider - full width line */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  opacity: 0.5;
+}
+
+/* First section (about) doesn't need top divider */
+#about::before {
+  display: none;
+}
+
+/* Tighter section spacing */
+.section {
+  min-height: auto;
+  padding: var(--space-xl) 0; /* 4rem - tighter */
+  position: relative;
+  scroll-margin-top: 30px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Connect sections visually - overlap slightly */
+.section + .section {
+  margin-top: -1px; /* Prevent subpixel gaps */
+}
+
+/* Footer gradient transition */
+.footer {
+  padding: var(--space-xl) 0 var(--space-lg);
+  border-top: none; /* Remove border, use gradient instead */
+  text-align: center;
+  background: transparent;
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Gradient from contact to footer */
+.footer-gradient {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, rgba(10, 10, 10, 0.8), var(--bg-primary));
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Footer content styling */
+.footer .container {
+  position: relative;
+  z-index: 2;
+}
+
+.footer-main {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  animation: fadeIn 0.6s ease 0.3s forwards;
+}
+
+.footer-tagline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  opacity: 0;
+  animation: fadeIn 0.6s ease 0.5s forwards;
+}
+
+/* Animated accent line */
+.footer-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: var(--space-md) auto 0;
+  animation: expandLine 1.5s ease 0.5s forwards;
+}
+
+@keyframes expandLine {
+  to { width: 80px; }
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-lg) 0; /* 2.5rem on mobile */
+  }
+  
+  .section-header {
+    margin-bottom: var(--space-sm);
+  }
+  
+  .section-header h2 {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+  
+  .section-header h2::before {
+    width: 15px;
+  }
+  
+  .section::before {
+    width: 40%;
+  }
+  
+  .footer-gradient {
+    top: -60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--space-md) 0; /* 1.5rem on small screens */
+  }
+}
