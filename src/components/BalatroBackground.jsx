@@ -17,7 +17,7 @@ const BalatroBackground = memo(() => {
     }
 
     let width, height;
-    const dpr = Math.min(window.devicePixelRatio, 2);
+    const dpr = Math.min(window.devicePixelRatio, 1.5); // CAP: 1.5x max
 
     const resize = () => {
       width = window.innerWidth;
@@ -30,25 +30,16 @@ const BalatroBackground = memo(() => {
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
-    // Vertex shader
-    const vertexShaderSource = `
-      attribute vec2 position;
-      void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-      }
-    `;
-
-    // Fragment shader - Balatro-style liquid noise with green theme
+    // SIMPLIFIED: Reduced iterations in fragment shader
     const fragmentShaderSource = `
-      precision highp float;
+      precision mediump float; // CHANGED: highp -> mediump for performance
       
       uniform vec2 resolution;
       uniform float time;
       uniform vec2 mouse;
       
-      // Simplex noise functions
       vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
       vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
       vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -58,8 +49,7 @@ const BalatroBackground = memo(() => {
                            -0.577350269189626, 0.024390243902439);
         vec2 i  = floor(v + dot(v, C.yy));
         vec2 x0 = v -   i + dot(i, C.xx);
-        vec2 i1;
-        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
         vec4 x12 = x0.xyxy + C.xxzz;
         x12.xy -= i1;
         i = mod289(i);
@@ -84,7 +74,8 @@ const BalatroBackground = memo(() => {
         float value = 0.0;
         float amplitude = 0.5;
         float frequency = 1.0;
-        for (int i = 0; i < 5; i++) {
+        // REDUCED: 5 -> 4 iterations
+        for (int i = 0; i < 4; i++) {
           value += amplitude * snoise(p * frequency);
           amplitude *= 0.5;
           frequency *= 2.0;
@@ -97,13 +88,11 @@ const BalatroBackground = memo(() => {
         vec2 p = uv * 2.0 - 1.0;
         p.x *= resolution.x / resolution.y;
         
-        // Mouse influence
         vec2 mousePos = mouse * 2.0 - 1.0;
         mousePos.x *= resolution.x / resolution.y;
         float mouseDist = length(p - mousePos);
         float mouseInfluence = smoothstep(1.5, 0.0, mouseDist) * 0.3;
         
-        // Animated coordinates
         float t = time * 0.15;
         vec2 q = vec2(
           fbm(p + t * 0.5 + mouseInfluence),
@@ -117,33 +106,31 @@ const BalatroBackground = memo(() => {
         
         float f = fbm(p + r * 2.0 + mouseInfluence);
         
-        // Green-tinted color palette (matching your theme)
-        // Deep forest green -> Emerald -> Bright mint -> Dark void
-        vec3 color1 = vec3(0.06, 0.16, 0.11);  // #0f2a1c - Deep forest
-        vec3 color2 = vec3(0.10, 0.30, 0.18);  // #1a4d2e - Rich green
-        vec3 color3 = vec3(0.29, 0.87, 0.50);  // #4ade80 - Your accent
-        vec3 color4 = vec3(0.04, 0.04, 0.04);  // #0a0a0a - Near black
+        // SIMPLIFIED: 3 colors instead of 4
+        vec3 color1 = vec3(0.06, 0.16, 0.11);
+        vec3 color2 = vec3(0.10, 0.30, 0.18);
+        vec3 color3 = vec3(0.29, 0.87, 0.50);
         
-        // Mix colors based on noise
         vec3 col = mix(color1, color2, clamp(f * 2.0, 0.0, 1.0));
         col = mix(col, color3, clamp(length(q) * 0.5, 0.0, 0.4));
-        col = mix(col, color4, clamp(length(r.x) * 0.3, 0.0, 0.6));
         
-        // Add subtle glow near mouse
         col += vec3(0.2, 0.8, 0.4) * mouseInfluence * 0.5;
         
-        // Vignette
         float vignette = 1.0 - length(uv - 0.5) * 0.8;
         col *= vignette;
-        
-        // Contrast boost
         col = pow(col, vec3(0.9));
         
         gl_FragColor = vec4(col, 1.0);
       }
     `;
 
-    // Compile shader
+    const vertexShaderSource = `
+      attribute vec2 position;
+      void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
     const compileShader = (source, type) => {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
@@ -173,7 +160,6 @@ const BalatroBackground = memo(() => {
 
     gl.useProgram(program);
 
-    // Create geometry (full-screen quad)
     const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -183,13 +169,15 @@ const BalatroBackground = memo(() => {
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Uniforms
     const resolutionLocation = gl.getUniformLocation(program, 'resolution');
     const timeLocation = gl.getUniformLocation(program, 'time');
     const mouseLocation = gl.getUniformLocation(program, 'mouse');
 
     let startTime = Date.now();
     let isActive = true;
+    let lastFrameTime = 0;
+    const targetFPS = 30; // CAP: 30fps
+    const frameInterval = 1000 / targetFPS;
 
     const handleMouseMove = (e) => {
       mouseRef.current = {
@@ -200,7 +188,6 @@ const BalatroBackground = memo(() => {
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Visibility handling
     const handleVisibility = () => {
       isActive = document.visibilityState === 'visible';
       if (isActive) {
@@ -212,21 +199,30 @@ const BalatroBackground = memo(() => {
     let lastTime = 0;
     document.addEventListener('visibilitychange', handleVisibility);
 
-    const animate = () => {
+    const animate = (currentTime) => {
       if (!isActive) return;
 
-      const currentTime = (Date.now() - startTime) * 0.001;
-      lastTime = currentTime * 1000;
+      // FRAME SKIP: Cap at 30fps
+      const now = currentTime || performance.now();
+      const delta = now - lastFrameTime;
+      if (delta < frameInterval) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = now - (delta % frameInterval);
+
+      const timeValue = (Date.now() - startTime) * 0.001;
+      lastTime = timeValue * 1000;
 
       gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
-      gl.uniform1f(timeLocation, currentTime);
+      gl.uniform1f(timeLocation, timeValue);
       gl.uniform2f(mouseLocation, mouseRef.current.x, mouseRef.current.y);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animate(performance.now());
 
     return () => {
       window.removeEventListener('resize', resize);

@@ -1,6 +1,6 @@
 /* ============================================
-   SAKSHI KATARIA PORTFOLIO - v9.2
-   Fixed Antigravity Layering + Snappy Animations
+   SAKSHI KATARIA PORTFOLIO - v9.4
+   Fixed Background Containment + Layout
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
@@ -63,19 +63,21 @@ body {
   --duration-slow: 0.3s;
 }
 
-/* ===== BACKGROUND SYSTEM ===== */
+/* ===== BACKGROUND SYSTEM - FIXED ===== */
+
+/* Hero Background - ABSOLUTE (not fixed) to contain to hero only */
 .hero-background {
-  position: fixed;
+  position: absolute; /* CHANGED: fixed -> absolute */
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
 }
 
-/* Antigravity Background - Fixed full viewport, behind content */
+/* Antigravity Background - Fixed full viewport, behind content, ALL screens */
 .antigravity-background {
   position: fixed;
   top: 0;
@@ -93,12 +95,7 @@ body {
   opacity: 1;
 }
 
-/* Legacy support - remove if not used elsewhere */
-.content-background {
-  display: none;
-}
-
-/* ===== LAYOUT ===== */
+/* ===== LAYOUT - FIXED ===== */
 .container {
   max-width: 1100px;
   margin: 0 auto;
@@ -107,21 +104,23 @@ body {
 
 .main-content {
   margin-left: 260px;
+  width: calc(100% - 260px); /* ADDED: prevent shrink */
   position: relative;
   z-index: 1;
 }
 
-/* ===== HERO SECTION ===== */
+/* ===== HERO SECTION - FIXED ===== */
 .hero-section {
-  position: relative;
+  position: relative; /* ADDED: contain absolute children */
   height: 100vh;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* ADDED: clip background to hero bounds */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
   background: transparent;
+  isolation: isolate; /* ADDED: create stacking context */
 }
 
 .hero-wrapper {
@@ -188,20 +187,17 @@ body {
   will-change: transform;
 }
 
-/* Smooth zoom on container hover */
 .zoom-text-container.hovered .zoom-char {
   transform: scale(1.12);
   text-shadow: 0 8px 30px rgba(74, 222, 128, 0.25);
 }
 
-/* Individual character hover - more dramatic */
 .zoom-char:hover {
   transform: scale(1.2) !important;
   text-shadow: 0 12px 40px rgba(74, 222, 128, 0.4) !important;
   z-index: 10;
 }
 
-/* Staggered animation delays - reduced */
 .zoom-text-container.hovered .zoom-char:nth-child(1) { transition-delay: 0ms; }
 .zoom-text-container.hovered .zoom-char:nth-child(2) { transition-delay: 8ms; }
 .zoom-text-container.hovered .zoom-char:nth-child(3) { transition-delay: 16ms; }
@@ -218,7 +214,6 @@ body {
 .zoom-text-container.hovered .zoom-char:nth-child(14) { transition-delay: 104ms; }
 .zoom-text-container.hovered .zoom-char:nth-child(15) { transition-delay: 112ms; }
 
-/* Hero Actions */
 .hero-actions {
   display: flex;
   gap: var(--space-md);
@@ -239,7 +234,6 @@ body {
   }
 }
 
-/* Magnetic Button */
 .magnetic-btn {
   position: relative;
   display: inline-flex;
@@ -291,7 +285,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* ===== CONTENT SECTIONS - TRANSPARENT BACKGROUNDS ===== */
+/* ===== CONTENT SECTIONS ===== */
 .section {
   min-height: 80vh;
   padding: var(--space-3xl) 0;
@@ -301,6 +295,7 @@ body {
   align-items: center;
   background: transparent;
   z-index: 1;
+  width: 100%; /* ADDED */
 }
 
 .section .container {
@@ -1423,7 +1418,7 @@ body {
   box-shadow: 0 8px 20px var(--accent-glow);
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE - FIXED ===== */
 @media (max-width: 1024px) {
   .sidebar {
     display: none !important;
@@ -1431,6 +1426,7 @@ body {
   
   .main-content {
     margin-left: 0 !important;
+    width: 100% !important;
   }
   
   .mobile-header {
@@ -1440,6 +1436,7 @@ body {
   .hero-section {
     padding-top: 60px;
     min-height: 100vh;
+    height: auto;
   }
   
   .zoom-char {
@@ -1451,8 +1448,17 @@ body {
     gap: var(--space-xl);
   }
   
-  .antigravity-background {
-    display: none;
+  /* REMOVED: .antigravity-background display: none - now shows on all screens */
+  
+  /* ADDED: Ensure proper container width */
+  .container {
+    max-width: 100%;
+    padding: 0 var(--space-md);
+  }
+  
+  .section {
+    width: 100%;
+    min-width: 100%;
   }
 }
 
@@ -1520,6 +1526,10 @@ body {
   .btn-submit {
     width: 100%;
   }
+  
+  .container {
+    padding: 0 16px;
+  }
 }
 
 /* ===== ACCESSIBILITY ===== */
@@ -1539,49 +1549,4 @@ input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* ADD THESE AT THE END OF YOUR CURRENT global.css */
-
-/* ===== URGENT LAYOUT FIXES ===== */
-
-/* Fix main content width and centering */
-.main-content {
-  margin-left: 260px;
-  width: calc(100% - 260px); /* ADD THIS */
-  position: relative;
-  z-index: 1;
-}
-
-/* Mobile: Remove margin and set full width */
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: 0 !important;
-    width: 100% !important; /* ADD THIS */
-  }
-  
-  /* Fix container centering on mobile */
-  .container {
-    max-width: 100%; /* CHANGE from 1100px to 100% on small screens */
-    padding: 0 var(--space-md);
-  }
-  
-  /* Ensure sections don't shrink */
-  .section {
-    width: 100%;
-    min-width: 100%;
-  }
-  
-  /* Center hero content properly */
-  .hero-content {
-    width: 100%;
-    padding: var(--space-lg);
-  }
-}
-
-/* Extra small screens */
-@media (max-width: 480px) {
-  .container {
-    padding: 0 16px; /* Consistent padding */
-  }
 }
