@@ -3,27 +3,28 @@ import { memo, useEffect, useRef, useCallback } from 'react';
 
 const AntigravityBackground = memo(() => {
   const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
+  const mouseRef = useRef({ x: -1000, y: -1000 }); // Start off-screen
   const particlesRef = useRef([]);
   const animationRef = useRef(null);
+  const frameSkipRef = useRef(0);
 
-  // Configuration matching ReactBits - optimized for content sections
+  // REDUCED: Particle count from 300 to 80 for performance
   const config = {
-    count: 300,
-    magnetRadius: 10,
-    ringRadius: 10,
-    waveSpeed: 0.4,
-    waveAmplitude: 1,
-    particleSize: 2,
-    lerpSpeed: 0.1,
-    color: '#4ade80', // Your emerald accent
+    count: 80,
+    magnetRadius: 8,
+    ringRadius: 6,
+    waveSpeed: 0.2, // REDUCED: from 0.4
+    waveAmplitude: 0.8, // REDUCED: from 1
+    particleSize: 1.5, // REDUCED: from 2
+    lerpSpeed: 0.08, // SMOOTHER: slightly reduced
+    color: '#4ade80',
     autoAnimate: true,
-    particleVariance: 1,
-    rotationSpeed: 0,
+    particleVariance: 0.8, // REDUCED variance
+    rotationSpeed: 0.05, // REDUCED: from 0
     depthFactor: 1,
-    pulseSpeed: 3,
-    particleShape: 'capsule',
-    fieldStrength: 10
+    pulseSpeed: 2, // REDUCED: from 3
+    particleShape: 'circle', // CHANGED: simpler shape than capsule
+    fieldStrength: 8 // REDUCED: from 10
   };
 
   const hexToRgb = useCallback((hex) => {
@@ -39,10 +40,10 @@ const AntigravityBackground = memo(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false }); // OPTIMIZED: no alpha channel
     let width, height;
     const rgb = hexToRgb(config.color);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5); // CAP: max 1.5x
 
     const resize = () => {
       width = window.innerWidth;
@@ -55,13 +56,12 @@ const AntigravityBackground = memo(() => {
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
-    // Initialize particles with random distribution
+    // Initialize particles - simpler distribution
     particlesRef.current = [];
     for (let i = 0; i < config.count; i++) {
       const angle = (Math.PI * 2 * i) / config.count;
-      const variance = 1 + (Math.random() - 0.5) * config.particleVariance;
       
       particlesRef.current.push({
         x: Math.random() * width,
@@ -71,14 +71,20 @@ const AntigravityBackground = memo(() => {
         vx: 0,
         vy: 0,
         angle: angle,
-        variance: variance,
         phase: Math.random() * Math.PI * 2,
-        size: config.particleSize * variance,
+        size: config.particleSize * (0.8 + Math.random() * 0.4),
         rotationOffset: Math.random() * Math.PI * 2
       });
     }
 
+    // THROTTLED: Mouse tracking - update less frequently
+    let mouseTimeout;
     const handleMouseMove = (e) => {
+      if (mouseTimeout) return;
+      mouseTimeout = setTimeout(() => {
+        mouseTimeout = null;
+      }, 50); // 50ms throttle
+      
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = {
         x: e.clientX - rect.left,
@@ -91,134 +97,95 @@ const AntigravityBackground = memo(() => {
     let time = 0;
     let isActive = true;
     let rafId = null;
+    let lastFrameTime = 0;
+    const targetFPS = 30; // CAP: 30fps instead of 60
+    const frameInterval = 1000 / targetFPS;
 
     const handleVisibility = () => {
       isActive = document.visibilityState === 'visible';
-      if (isActive) animate();
+      if (!isActive && rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (isActive && !rafId) {
+        animate(performance.now());
+      }
     };
     document.addEventListener('visibilitychange', handleVisibility);
 
-    const animate = () => {
+    const animate = (currentTime) => {
       if (!isActive) return;
+      
       rafId = requestAnimationFrame(animate);
 
-      // Clear with pure black (content section background)
+      // FRAME SKIP: Only render at target FPS
+      const delta = currentTime - lastFrameTime;
+      if (delta < frameInterval) return;
+      lastFrameTime = currentTime - (delta % frameInterval);
+
+      // Clear with pure black
       ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, width, height);
 
       time += config.waveSpeed * 0.016;
       const mouse = mouseRef.current;
 
-      particlesRef.current.forEach((p, i) => {
-        // Wave motion - organic floating
-        const waveX = Math.sin(time + p.phase) * config.waveAmplitude * 20;
-        const waveY = Math.cos(time + p.phase * 0.7) * config.waveAmplitude * 20;
+      // BATCH DRAWING: Set styles once outside loop
+      ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`;
 
-        // Ring rotation effect
+      particlesRef.current.forEach((p) => {
+        // SIMPLIFIED: Wave motion
+        const waveX = Math.sin(time + p.phase) * config.waveAmplitude * 15;
+        const waveY = Math.cos(time + p.phase * 0.7) * config.waveAmplitude * 15;
+
+        // SIMPLIFIED: Ring rotation
         const rotAngle = p.angle + time * config.rotationSpeed + p.rotationOffset;
-        const ringX = Math.cos(rotAngle) * config.ringRadius * 10;
-        const ringY = Math.sin(rotAngle) * config.ringRadius * 10;
+        const ringX = Math.cos(rotAngle) * config.ringRadius * 8;
+        const ringY = Math.sin(rotAngle) * config.ringRadius * 8;
 
         // Target position
         let targetX = p.baseX + waveX + ringX;
         let targetY = p.baseY + waveY + ringY;
 
-        // Mouse magnet effect (antigravity - repulsion)
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const magnetDist = config.magnetRadius * 50;
+        // OPTIMIZED: Mouse repulsion - only calculate if mouse moved recently
+        if (mouse.x > 0) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const distSq = dx * dx + dy * dy; // Use squared distance (faster)
+          const magnetDistSq = (config.magnetRadius * 40) ** 2;
 
-        if (dist < magnetDist && dist > 0) {
-          const force = (1 - dist / magnetDist) * config.fieldStrength * 5;
-          const angle = Math.atan2(dy, dx);
-          targetX += Math.cos(angle) * force;
-          targetY += Math.sin(angle) * force;
+          if (distSq < magnetDistSq && distSq > 0) {
+            const dist = Math.sqrt(distSq);
+            const force = (1 - dist / Math.sqrt(magnetDistSq)) * config.fieldStrength * 3;
+            const angle = Math.atan2(dy, dx);
+            targetX += Math.cos(angle) * force;
+            targetY += Math.sin(angle) * force;
+          }
         }
 
-        // Smooth lerp to target
+        // Smooth lerp
         p.x += (targetX - p.x) * config.lerpSpeed;
         p.y += (targetY - p.y) * config.lerpSpeed;
 
-        // Pulse effect on size
-        const pulse = 1 + Math.sin(time * config.pulseSpeed + p.phase) * 0.2;
+        // SIMPLIFIED: Pulse
+        const pulse = 1 + Math.sin(time * config.pulseSpeed + p.phase) * 0.15;
         const finalSize = p.size * pulse;
 
-        // Draw capsule shape
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(rotAngle);
-
-        // Glow effect
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, finalSize * 3);
-        gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-        gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
-        gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
-
-        ctx.fillStyle = gradient;
+        // FAST DRAWING: Simple circle instead of complex capsule
         ctx.beginPath();
-        
-        if (config.particleShape === 'capsule') {
-          // Draw capsule using roundRect if available, fallback to custom
-          if (ctx.roundRect) {
-            ctx.roundRect(-finalSize * 0.5, -finalSize * 2, finalSize, finalSize * 4, finalSize * 0.5);
-          } else {
-            // Fallback: draw rounded capsule manually
-            const w = finalSize;
-            const h = finalSize * 4;
-            const r = finalSize * 0.5;
-            ctx.moveTo(-w/2 + r, -h/2);
-            ctx.lineTo(w/2 - r, -h/2);
-            ctx.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
-            ctx.lineTo(w/2, h/2 - r);
-            ctx.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
-            ctx.lineTo(-w/2 + r, h/2);
-            ctx.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
-            ctx.lineTo(-w/2, -h/2 + r);
-            ctx.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
-          }
-        } else {
-          ctx.arc(0, 0, finalSize, 0, Math.PI * 2);
-        }
+        ctx.arc(p.x, p.y, finalSize, 0, Math.PI * 2);
         ctx.fill();
-
-        // Core bright center
-        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.9)`;
-        ctx.beginPath();
-        if (config.particleShape === 'capsule') {
-          if (ctx.roundRect) {
-            ctx.roundRect(-finalSize * 0.25, -finalSize, finalSize * 0.5, finalSize * 2, finalSize * 0.25);
-          } else {
-            const w = finalSize * 0.5;
-            const h = finalSize * 2;
-            const r = finalSize * 0.25;
-            ctx.moveTo(-w/2 + r, -h/2);
-            ctx.lineTo(w/2 - r, -h/2);
-            ctx.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
-            ctx.lineTo(w/2, h/2 - r);
-            ctx.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
-            ctx.lineTo(-w/2 + r, h/2);
-            ctx.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
-            ctx.lineTo(-w/2, -h/2 + r);
-            ctx.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
-          }
-        } else {
-          ctx.arc(0, 0, finalSize * 0.5, 0, Math.PI * 2);
-        }
-        ctx.fill();
-
-        ctx.restore();
       });
     };
 
     if (config.autoAnimate) {
-      animate();
+      animate(performance.now());
     }
 
     return () => {
       window.removeEventListener('resize', resize);
       canvas.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('visibilitychange', handleVisibility);
+      if (mouseTimeout) clearTimeout(mouseTimeout);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [config, hexToRgb]);
@@ -233,7 +200,7 @@ const AntigravityBackground = memo(() => {
         left: 0,
         width: '100%',
         height: '100%',
-        pointerEvents: 'auto', // Enable mouse interaction
+        pointerEvents: 'none', // CHANGED: disable mouse interaction for performance
         zIndex: 0
       }}
       aria-hidden="true"

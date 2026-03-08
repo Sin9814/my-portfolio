@@ -52,36 +52,54 @@ function App() {
     setMobileMenuOpen(false);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY;
-      setScrolled(y > 50);
-      setShowScrollTop(y > 500);
-      
-      // Show antigravity ONLY after scrolling past hero completely
-      const heroHeight = window.innerHeight;
-      setShowAntigravity(y > heroHeight * 0.9);
+  // REPLACE your current useEffect scroll handler with this:
 
-      const scrollPosition = y + 200;
-      const sections = NAV_LINKS.map(link => link.id);
-      
-      for (const sectionId of sections) {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const top = element.offsetTop;
-          const height = element.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(sectionId);
-            break;
+useEffect(() => {
+  let ticking = false;
+  let lastScrollY = 0;
+  
+  const handleScroll = () => {
+    const y = window.scrollY;
+    
+    // Skip if scroll position hasn't changed significantly
+    if (Math.abs(y - lastScrollY) < 5) return;
+    lastScrollY = y;
+    
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        setScrolled(y > 50);
+        setShowScrollTop(y > 500);
+        
+        // Show antigravity after hero
+        const heroHeight = window.innerHeight;
+        setShowAntigravity(y > heroHeight * 0.9);
+
+        // Section detection - only check every 100ms worth of scroll
+        const scrollPosition = y + 200;
+        const sections = NAV_LINKS.map(link => link.id);
+        
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const top = element.offsetTop;
+            const height = element.offsetHeight;
+            if (scrollPosition >= top && scrollPosition < top + height) {
+              setActiveSection(sectionId);
+              break;
+            }
           }
         }
-      }
-    };
+        
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
 
   useEffect(() => {
     const handleResize = () => {

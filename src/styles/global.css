@@ -1540,3 +1540,48 @@ textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ADD THESE AT THE END OF YOUR CURRENT global.css */
+
+/* ===== URGENT LAYOUT FIXES ===== */
+
+/* Fix main content width and centering */
+.main-content {
+  margin-left: 260px;
+  width: calc(100% - 260px); /* ADD THIS */
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile: Remove margin and set full width */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important; /* ADD THIS */
+  }
+  
+  /* Fix container centering on mobile */
+  .container {
+    max-width: 100%; /* CHANGE from 1100px to 100% on small screens */
+    padding: 0 var(--space-md);
+  }
+  
+  /* Ensure sections don't shrink */
+  .section {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  /* Center hero content properly */
+  .hero-content {
+    width: 100%;
+    padding: var(--space-lg);
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 16px; /* Consistent padding */
+  }
+}
