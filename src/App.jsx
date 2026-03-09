@@ -59,7 +59,6 @@ function App() {
     const handleScroll = () => {
       const y = window.scrollY;
       
-      // Skip if scroll position hasn't changed significantly
       if (Math.abs(y - lastScrollY) < 5) return;
       lastScrollY = y;
       
@@ -68,11 +67,10 @@ function App() {
           setScrolled(y > 50);
           setShowScrollTop(y > 500);
           
-          // Show antigravity after hero on ALL screen sizes
+          // CHANGED: Antigravity appears immediately as hero leaves viewport
           const heroHeight = window.innerHeight;
-          setShowAntigravity(y > heroHeight * 0.9);
+          setShowAntigravity(y > heroHeight * 0.1); // Was 0.9, now 0.1
 
-          // Section detection
           const scrollPosition = y + 200;
           const sections = NAV_LINKS.map(link => link.id);
           
@@ -120,10 +118,13 @@ function App() {
         <BalatroBackground />
       </div>
 
-      {/* Antigravity Background - ALL screens, after hero */}
+      {/* Antigravity Background - ALL screens, after hero with gradient transition */}
       <div className={`antigravity-background ${showAntigravity ? 'visible' : ''}`}>
         <AntigravityBackground />
       </div>
+
+      {/* Gradient overlay for smooth transition */}
+      <div className="hero-gradient-overlay" />
 
       {/* Navigation */}
       <Navbar 

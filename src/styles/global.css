@@ -1,6 +1,6 @@
 /* ============================================
-   SAKSHI KATARIA PORTFOLIO - v9.5
-   Reduced Section Spacing
+   SAKSHI KATARIA PORTFOLIO - v9.6
+   Smooth Background + Tighter Spacing + Header Animations
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
@@ -50,9 +50,9 @@ body {
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2.5rem;
-  --space-xl: 4rem;
-  --space-2xl: 5rem; /* REDUCED: from 6rem */
-  --space-3xl: 6rem; /* REDUCED: from 8rem */
+  --space-xl: 3rem; /* REDUCED: from 4rem for tighter spacing */
+  --space-2xl: 4rem; /* REDUCED: from 5rem */
+  --space-3xl: 5rem; /* REDUCED: from 6rem */
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -63,7 +63,7 @@ body {
   --duration-slow: 0.3s;
 }
 
-/* ===== BACKGROUND SYSTEM ===== */
+/* ===== BACKGROUND SYSTEM - SMOOTH TRANSITION ===== */
 .hero-background {
   position: absolute;
   top: 0;
@@ -75,6 +75,30 @@ body {
   overflow: hidden;
 }
 
+/* Gradient overlay for smooth Balatro to Antigravity transition */
+.hero-gradient-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 70%,
+    rgba(10, 10, 10, 0.3) 85%,
+    rgba(10, 10, 10, 0.8) 95%,
+    var(--bg-primary) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.hero-gradient-overlay.visible {
+  opacity: 1;
+}
+
 .antigravity-background {
   position: fixed;
   top: 0;
@@ -84,7 +108,7 @@ body {
   z-index: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.8s ease; /* SMOOTHER: longer fade */
   overflow: hidden;
 }
 
@@ -282,10 +306,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* ===== CONTENT SECTIONS - REDUCED SPACING ===== */
+/* ===== CONTENT SECTIONS - TIGHTER SPACING ===== */
 .section {
-  min-height: auto; /* CHANGED: from 80vh to auto */
-  padding: var(--space-2xl) 0; /* CHANGED: from space-3xl (8rem) to space-2xl (5rem) */
+  min-height: auto;
+  padding: var(--space-xl) 0; /* 3rem - tighter */
   position: relative;
   scroll-margin-top: 30px;
   display: flex;
@@ -301,9 +325,18 @@ body {
   z-index: 2;
 }
 
+/* ===== SECTION HEADER ANIMATIONS ===== */
 .section-header {
-  margin-bottom: var(--space-lg); /* REDUCED: from space-xl */
+  margin-bottom: var(--space-md); /* REDUCED: from space-lg */
   max-width: 600px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+}
+
+.section-header.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .section-header h2 {
@@ -316,18 +349,31 @@ body {
   margin-bottom: var(--space-sm);
   position: relative;
   display: inline-block;
+  transform: translateX(-20px);
+  opacity: 0;
+  transition: transform 0.5s var(--ease-out-expo) 0.1s, opacity 0.5s var(--ease-out-expo) 0.1s;
 }
 
+.section-header.visible h2 {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Accent underline animation */
 .section-header h2::after {
   content: '';
   position: absolute;
   bottom: -8px;
   left: 0;
-  width: 40px;
+  width: 0;
   height: 2px;
   background: var(--accent);
   border-radius: 2px;
-  transition: width 0.2s ease;
+  transition: width 0.4s ease 0.3s;
+}
+
+.section-header.visible h2::after {
+  width: 40px;
 }
 
 .section-header h2:hover::after {
@@ -764,8 +810,8 @@ body {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: var(--space-xl); /* REDUCED: from space-2xl */
-  padding-bottom: var(--space-lg); /* REDUCED: from space-xl */
+  margin-bottom: var(--space-lg); /* REDUCED */
+  padding-bottom: var(--space-md); /* REDUCED */
   border-bottom: 1px solid var(--border);
   align-items: center;
   justify-content: flex-start;
@@ -828,7 +874,7 @@ body {
 .skills-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm); /* REDUCED: from space-md */
   max-width: 900px;
 }
 
@@ -836,7 +882,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-xl);
-  padding: var(--space-md) 0; /* REDUCED: tighter padding */
+  padding: var(--space-sm) 0; /* REDUCED: tighter */
   border-bottom: 1px solid var(--border);
   opacity: 0;
   transform: translateX(-20px);
@@ -1123,10 +1169,10 @@ body {
   transform: scale(1);
 }
 
-/* ===== CONTACT - REDUCED SPACING ===== */
+/* ===== CONTACT - TIGHTER SPACING ===== */
 #contact {
   min-height: auto;
-  padding: var(--space-xl) 0; /* REDUCED: from space-2xl */
+  padding: var(--space-lg) 0; /* REDUCED: from space-xl */
 }
 
 #contact.section {
@@ -1136,7 +1182,7 @@ body {
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-2xl); /* REDUCED: from space-3xl */
+  gap: var(--space-xl); /* REDUCED: from space-2xl */
   align-items: start;
 }
 
@@ -1148,7 +1194,7 @@ body {
   font-size: 1.25rem;
   line-height: 1.8;
   color: var(--text-secondary);
-  margin-bottom: var(--space-md); /* REDUCED: from space-lg */
+  margin-bottom: var(--space-sm); /* REDUCED */
 }
 
 .contact-subtext {
@@ -1442,7 +1488,7 @@ body {
   
   .contact-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-xl); /* REDUCED for mobile */
+    gap: var(--space-lg);
   }
   
   .container {
@@ -1462,7 +1508,11 @@ body {
   }
   
   .section {
-    padding: var(--space-xl) 0; /* REDUCED: from space-2xl */
+    padding: var(--space-lg) 0; /* 2.5rem */
+  }
+  
+  .section-header {
+    margin-bottom: var(--space-sm);
   }
   
   .project-card {
@@ -1484,7 +1534,7 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-sm);
-    padding: var(--space-sm) 0; /* REDUCED */
+    padding: var(--space-xs) 0;
   }
   
   .skill-category {
@@ -1526,7 +1576,11 @@ body {
   }
   
   .section {
-    padding: var(--space-lg) 0; /* FURTHER REDUCED for small screens */
+    padding: var(--space-md) 0; /* 1.5rem */
+  }
+  
+  .section-header h2 {
+    font-size: 1.75rem;
   }
 }
 
@@ -1547,25 +1601,4 @@ input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* ADD THIS AT THE END of your current global.css */
-
-/* ===== SECTION SPACING REDUCTION ===== */
-
-.section {
-  padding: var(--space-xl) 0; /* 4rem - reduced from 5rem */
-}
-
-/* Further reduction on mobile */
-@media (max-width: 768px) {
-  .section {
-    padding: var(--space-lg) 0; /* 2.5rem */
-  }
-}
-
-@media (max-width: 480px) {
-  .section {
-    padding: var(--space-md) 0; /* 1.5rem */
-  }
 }
