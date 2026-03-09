@@ -1549,3 +1549,23 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* ADD THIS AT THE END of your current global.css */
+
+/* ===== SECTION SPACING REDUCTION ===== */
+
+.section {
+  padding: var(--space-xl) 0; /* 4rem - reduced from 5rem */
+}
+
+/* Further reduction on mobile */
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-lg) 0; /* 2.5rem */
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: var(--space-md) 0; /* 1.5rem */
+  }
+}
