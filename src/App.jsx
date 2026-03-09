@@ -1,6 +1,6 @@
 // src/App.jsx
 import React from 'react';
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
@@ -34,6 +34,10 @@ function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [showAntigravity, setShowAntigravity] = useState(false);
+  
+  // Track visible sections for header animations
+  const [visibleSections, setVisibleSections] = useState(new Set());
+  const observerRef = useRef(null);
 
   const scrollTo = useCallback((id) => {
     const element = document.getElementById(id);
@@ -52,6 +56,39 @@ function App() {
     setMobileMenuOpen(false);
   }, []);
 
+  // Intersection Observer for section header animations
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const sectionId = entry.target.id;
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => new Set([...prev, sectionId]));
+          }
+        });
+      },
+      {
+        threshold: 0.2, // Trigger when 20% of section is visible
+        rootMargin: '-50px 0px -50px 0px'
+      }
+    );
+
+    // Observe all content sections
+    const sections = ['about', 'skills', 'work', 'contact'];
+    sections.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element && observerRef.current) {
+        observerRef.current.observe(element);
+      }
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     let ticking = false;
     let lastScrollY = 0;
@@ -67,9 +104,9 @@ function App() {
           setScrolled(y > 50);
           setShowScrollTop(y > 500);
           
-          // CHANGED: Antigravity appears immediately as hero leaves viewport
+          // FIXED: Balatro stays longer, Antigravity appears at 70% scroll
           const heroHeight = window.innerHeight;
-          setShowAntigravity(y > heroHeight * 0.1); // Was 0.9, now 0.1
+          setShowAntigravity(y > heroHeight * 0.7); // Was 0.3, now 0.7
 
           const scrollPosition = y + 200;
           const sections = NAV_LINKS.map(link => link.id);
@@ -111,6 +148,9 @@ function App() {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
   }, [mobileMenuOpen]);
 
+  // Helper to check if section is visible
+  const isSectionVisible = (id) => visibleSections.has(id);
+
   return (
     <div className="app">
       {/* Balatro Background - Only in Hero */}
@@ -118,13 +158,10 @@ function App() {
         <BalatroBackground />
       </div>
 
-      {/* Antigravity Background - ALL screens, after hero with gradient transition */}
+      {/* Antigravity Background - ALL screens, after hero */}
       <div className={`antigravity-background ${showAntigravity ? 'visible' : ''}`}>
         <AntigravityBackground />
       </div>
-
-      {/* Gradient overlay for smooth transition */}
-      <div className="hero-gradient-overlay" />
 
       {/* Navigation */}
       <Navbar 
@@ -141,19 +178,31 @@ function App() {
           <Hero scrollTo={scrollTo} />
         </section>
 
-        <section id="about" className="section">
+        <section 
+          id="about" 
+          className={`section ${isSectionVisible('about') ? 'section-visible' : ''}`}
+        >
           <About />
         </section>
         
-        <section id="skills" className="section">
+        <section 
+          id="skills" 
+          className={`section ${isSectionVisible('skills') ? 'section-visible' : ''}`}
+        >
           <Skills />
         </section>
         
-        <section id="work" className="section">
+        <section 
+          id="work" 
+          className={`section ${isSectionVisible('work') ? 'section-visible' : ''}`}
+        >
           <Work />
         </section>
         
-        <section id="contact" className="section">
+        <section 
+          id="contact" 
+          className={`section ${isSectionVisible('contact') ? 'section-visible' : ''}`}
+        >
           <Contact />
         </section>
         

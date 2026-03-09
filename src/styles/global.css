@@ -325,16 +325,16 @@ body {
   z-index: 2;
 }
 
-/* ===== SECTION HEADER ANIMATIONS ===== */
 .section-header {
-  margin-bottom: var(--space-md); /* REDUCED: from space-lg */
+  margin-bottom: var(--space-md);
   max-width: 600px;
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
 }
 
-.section-header.visible {
+/* Animate when parent section is visible */
+.section-visible .section-header {
   opacity: 1;
   transform: translateY(0);
 }
@@ -354,12 +354,11 @@ body {
   transition: transform 0.5s var(--ease-out-expo) 0.1s, opacity 0.5s var(--ease-out-expo) 0.1s;
 }
 
-.section-header.visible h2 {
+.section-visible .section-header h2 {
   transform: translateX(0);
   opacity: 1;
 }
 
-/* Accent underline animation */
 .section-header h2::after {
   content: '';
   position: absolute;
@@ -372,7 +371,7 @@ body {
   transition: width 0.4s ease 0.3s;
 }
 
-.section-header.visible h2::after {
+.section-visible .section-header h2::after {
   width: 40px;
 }
 
