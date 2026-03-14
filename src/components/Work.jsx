@@ -23,12 +23,21 @@ const ProjectCard = ({ project, index }) => {
     setTilt({ x: 0, y: 0 });
     setIsHovered(false);
   };
+
+  // NEW: Handle card click
+  const handleClick = () => {
+    if (project.link) {
+      window.open(project.link, '_blank', 'noopener,noreferrer');
+    }
+  };
   
   return (
     <article 
       ref={cardRef}
       className={`project-card ${isHovered ? 'hovered' : ''}`}
+      onClick={handleClick}
       style={{
+        cursor: project.link ? 'pointer' : 'default',
         transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) ${isHovered ? 'translateY(-8px)' : ''}`,
         transition: isHovered ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
@@ -41,7 +50,10 @@ const ProjectCard = ({ project, index }) => {
       }}></div>
       
       <div className="card-content">
-        <h3>{project.title}</h3>
+        <h3>
+          {project.title}
+          {project.link && <span style={{ fontSize: '0.7em', marginLeft: '8px', opacity: 0.7 }}>↗</span>}
+        </h3>
         <p className="project-description">{project.description}</p>
         <ul className="project-highlights">
           {project.highlights.map((highlight, i) => (

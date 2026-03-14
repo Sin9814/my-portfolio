@@ -5,7 +5,7 @@ export const CONFIG = {
   name: "Sakshi Kataria",
   title: "", // Removed role tag
   email: "sakshikataria9814@gmail.com",
-  resumeLink: "https://drive.google.com/file/d/1voYYu3-i2AxD4egr7p-IbUJDNPhsPvrR/view?usp=sharing",
+  resumeLink: "https://drive.google.com/file/d/1NqWjlVYqrnjnBiccEFwiWkCyUQB1jKRb/view?usp=sharing",
   location: "India",
   experience: "2+ Years",
   company: "Tata Consultancy Services",
@@ -30,15 +30,15 @@ export const NAV_LINKS = [
 export const SKILLS = [
   {
     category: "Backend",
-    items: ["Java", "Spring Boot", "SQL", "REST API"]
+    items: ["Java", "Spring Boot", "REST APIs", "SQL (PostgreSQL, Neon)", "JPA/Hibernate", "Postman"]
   },
   {
     category: "Frontend",
-    items: ["React.js", "JavaScript", "HTML", "CSS"]
+    items: ["React.js", "JavaScript","Angular", "HTML", "CSS","Bootstrap"]
   },
   {
-    category: "Tools",
-    items: ["Git", "GitHub", "Bootstrap"]
+    category: "DevOps & Tools",
+    items: ["Git", "GitHub", "Render","Vercel","Docker"]
   }
 ];
 
@@ -46,14 +46,15 @@ export const SKILLS = [
 // ===== PROJECTS DATA =====
 export const PROJECTS = [
   {
-    title: "DGCA (Directorate General of Civil Aviation)",
-    description: "Enhanced legacy backend systems for aircraft safety certifications and airworthiness monitoring. Refactored critical services, implemented transaction management for data consistency, and optimized high-usage SQL queries executed 1M+ times weekly.",
-    highlights: ["Java & Spring Boot", "SQL Optimization (17s → 4s)", "30+ Services Maintained"]
+    title: "Clinical Resource Manager",
+    description: "Developed using Java 17/Spring Boot 3 with an Angular frontend and Neon PostgreSQL. Implemented RBAC/JWT security and orchestrated a cloud-native deployment via Render and Vercel to handle high-concurrency scheduling following Azure-aligned scalability best practices.",
+    highlights: ["Java & Spring Boot", "JWT & RBAC", "Azure-aligned"],
+      link: "https://your-clinical-link.vercel.app"
   },
   {
-    title: "BCAS (Bureau of Civil Aviation Security)",
-    description: "Developed reusable backend services and transaction-safe workflows for aviation security platforms. Built internal deployment utilities to streamline environment management and reduce manual errors.",
-    highlights: ["Java & Spring Boot", "REST APIs", "Deployment Automation"]
+    title: "Vehicle Anti-Theft System",
+    description: "Developed a high-fidelity biometric security module utilizing Python, OpenCV, and SSD optimized for real-time Edge-AI inference. Engineered a proactive SMTP alert engine for instant threat notification and bridged software-to-hardware execution via a validated ESP8266/Arduino prototype.",
+    highlights: ["Edge-AI inference", "Python, OpenCV", "SMTP"]
   }
 ];
 
