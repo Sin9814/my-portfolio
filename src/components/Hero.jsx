@@ -95,7 +95,7 @@ const Hero = memo(({ scrollTo }) => {
           
           <MagneticButton
             className="btn btn-secondary"
-            onClick={() => window.open('https://drive.google.com/file/d/1voYYu3-i2AxD4egr7p-IbUJDNPhsPvrR/view?usp=sharing', '_blank')}
+            onClick={() => window.open('https://drive.google.com/file/d/1NqWjlVYqrnjnBiccEFwiWkCyUQB1jKRb/view?usp=sharing', '_blank')}
           >
             <Icon name="Download" size={18} />
             Resume

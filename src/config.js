@@ -49,7 +49,7 @@ export const PROJECTS = [
     title: "Clinical Resource Manager",
     description: "Developed using Java 17/Spring Boot 3 with an Angular frontend and Neon PostgreSQL. Implemented RBAC/JWT security and orchestrated a cloud-native deployment via Render and Vercel to handle high-concurrency scheduling following Azure-aligned scalability best practices.",
     highlights: ["Java & Spring Boot", "JWT & RBAC", "Azure-aligned"],
-      link: "https://your-clinical-link.vercel.app"
+      link: "https://sinhospital.vercel.app/"
   },
   {
     title: "Vehicle Anti-Theft System",
